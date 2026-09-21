@@ -1,0 +1,196 @@
+---
+import { ruta } from "../lib/ruta";
+const ventajas = [
+  "Respuesta en menos de 24hs hábiles",
+  "Demo personalizada a tu industria",
+  "Sin contrato de permanencia",
+];
+
+const rubros = ["Gastronomía", "Belleza", "Deporte", "Salud", "Retail", "Servicios", "Otro"];
+---
+
+<section class="contacto" id="contacto">
+  <div class="onda onda-top" aria-hidden="true" data-wave="12">
+    <img src={ruta("/decor/wave-top-dark.svg")} alt="" />
+  </div>
+
+  <div class="contacto-body">
+    <div class="container cols">
+      <div class="intro" data-reveal="up-md">
+        <h2 class="section-title titulo-claro">
+          <span class="line">Empezá a construir</span>
+          <span class="line">tu comunidad de fans.</span>
+        </h2>
+        <p class="lead lead-claro">
+          Contanos sobre tu negocio. Te mostramos cómo funciona strix en tu rubro y si tiene
+          sentido para lo que querés lograr. Sin presión.
+        </p>
+        <ul class="ventajas">
+          {
+            ventajas.map((v) => (
+              <li>
+                <span class="tilde">
+                  <img src={ruta("/icons/check.svg")} width="14" height="14" alt="" />
+                </span>
+                {v}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="form-card" data-reveal="right">
+        <h3 class="form-titulo">Ponete en contacto</h3>
+
+        <!--
+          TODO: el formulario todavía no está conectado a ningún lado.
+          Para que envíe de verdad sin costo hay dos caminos: un servicio de
+          formularios con plan gratuito (Formspree, Web3Forms) apuntando el
+          `action`, o una función serverless propia.
+        -->
+        <form class="form" id="form-contacto" novalidate>
+          <div class="campo">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" name="nombre" type="text" placeholder="Tu nombre" required autocomplete="name" />
+          </div>
+
+          <div class="campo">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="hola@tu-negocio.com" required autocomplete="email" />
+          </div>
+
+          <div class="campo">
+            <label for="industria">Industria</label>
+            <div class="select-wrap">
+              <select id="industria" name="industria" required>
+                <option value="" selected disabled>Tu rubro</option>
+                {rubros.map((r) => <option value={r}>{r}</option>)}
+              </select>
+              <img src={ruta("/icons/chevron-down.svg")} width="16" height="16" alt="" aria-hidden="true" />
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="negocio">Nombre del negocio</label>
+            <input id="negocio" name="negocio" type="text" placeholder="¿Cómo se llama tu negocio?" required />
+          </div>
+
+          <div class="campo campo-ancho">
+            <button class="btn btn-primary enviar" type="submit">Agendar demo</button>
+            <p class="aviso" id="form-aviso" role="status" aria-live="polite">
+              Sin spam. Tu info solo se usa para contactarte.
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById("form-contacto") as HTMLFormElement | null;
+  const aviso = document.getElementById("form-aviso");
+
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!aviso) return;
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    // Prototipo: todavía no hay backend donde mandar esto.
+    aviso.textContent =
+      "Este formulario todavía no está conectado — es un prototipo. Escribinos a info@strix.fan.";
+    aviso.classList.add("aviso-destacado");
+  });
+</script>
+
+<style>
+  .contacto { position: relative; background: #fff; }
+  /* Sin fondo, para no tapar los logos de la sección de arriba. */
+  .onda-top { aspect-ratio: 1440 / 213; --onda-dur: 17s; --onda-fase: -3s; }
+
+  .contacto-body { margin-top: -1px; padding-block: 24px 120px; background: var(--dark); }
+
+  .cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 64px;
+    align-items: start;
+  }
+
+  .intro { display: grid; gap: 24px; padding-top: 8px; }
+  .titulo-claro { color: #fff; }
+  .lead-claro { color: rgb(255 255 255 / .62); max-width: 46ch; }
+
+  .ventajas { display: grid; gap: 16px; margin: 8px 0 0; padding: 0; list-style: none; }
+  .ventajas li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-alt);
+    font-size: 16px;
+    color: rgb(255 255 255 / .9);
+  }
+  .tilde {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 24px; height: 24px;
+    border: 1.5px solid var(--indigo);
+    border-radius: 50%;
+  }
+
+  /* ---------------- formulario ---------------- */
+  .form-titulo { margin: 0 0 20px; font-size: 24px; font-weight: 600; color: #fff; }
+
+  .form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+  .campo { display: grid; gap: 8px; min-width: 0; }
+  .campo-ancho { grid-column: 1 / -1; }
+
+  .campo label { font-size: 14px; font-weight: 500; color: rgb(255 255 255 / .82); }
+
+  .campo input,
+  .campo select,
+  .campo textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    color: var(--fg);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 20px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .campo textarea { resize: vertical; min-height: 116px; }
+  .campo ::placeholder { color: var(--muted-2); }
+
+  .campo input:focus-visible,
+  .campo select:focus-visible,
+  .campo textarea:focus-visible {
+    outline: none;
+    border-color: var(--indigo);
+    box-shadow: 0 0 0 3px rgb(84 113 255 / .22);
+  }
+
+  .select-wrap { position: relative; display: grid; }
+  .select-wrap select { appearance: none; padding-right: 42px; }
+  .select-wrap select:invalid { color: var(--muted-2); }
+  .select-wrap img { position: absolute; right: 16px; top: 50%; translate: 0 -50%; pointer-events: none; }
+
+  .enviar { width: 100%; padding: 16px; }
+
+  .aviso { margin: 12px 0 0; font-family: var(--font-alt); font-size: 13px; color: rgb(255 255 255 / .45); }
+  .aviso.aviso-destacado { color: var(--indigo-light); }
+
+  @media (max-width: 900px) {
+    .cols { grid-template-columns: 1fr; gap: 44px; }
+    .contacto-body { padding-bottom: 80px; }
+  }
+  @media (max-width: 560px) {
+    .form { grid-template-columns: 1fr; }
+  }
+</style>

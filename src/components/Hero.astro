@@ -1,0 +1,320 @@
+---
+import { ruta } from "../lib/ruta";
+// Hero — node 303900:17772 / header 303897:17597
+// El fondo, los glows y la onda van a pantalla completa; el titular y los
+// celulares viven dentro de la escena (el contenido, máx. 1366px).
+// Las medidas verticales se escalan sobre --escena con el factor px/1280,
+// porque en el Figma el contenido medía 1280px dentro de un frame de 1440px.
+---
+
+<section class="hero" id="inicio">
+  <div class="hero-glows" aria-hidden="true">
+    <img class="glow glow-bar" src={ruta("/decor/vector4.svg")} alt="" />
+    <img class="glow glow-blob" src={ruta("/decor/ellipse139.svg")} alt="" data-parallax="0.09" />
+    <!-- Esta no viene del Figma: los dos glows de arriba dejan el lado
+         izquierdo plano, y abajo del titular el fondo era un azul liso. -->
+    <span class="glow glow-aura"></span>
+  </div>
+
+  <header class="nav" data-reveal="fade" style="--rv-dur:.5s">
+    <div class="container nav-inner">
+      <a class="nav-logo" href="/" aria-label="strix — inicio">
+        <img src={ruta("/img/logo-strix.svg")} alt="strix" width="65" height="26" />
+      </a>
+      <!-- Los destinos son los mismos que usa el footer, para que las dos
+           navegaciones no manden a lugares distintos con el mismo nombre. -->
+      <nav class="nav-links" aria-label="Secciones">
+        <a href="#inicio">Inicio</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#herramientas">Funcionalidades</a>
+        <a href="#industrias">Industrias</a>
+        <a href="#faq">Preguntas</a>
+      </nav>
+
+      <nav class="nav-actions" aria-label="Acceso">
+        <!-- El Figma dice "Ingersar" (typo). Se escribe la forma correcta. -->
+        <a class="btn btn-ghost-light" href="#contacto">Ingresar</a>
+        <a class="btn btn-white" href="#contacto">Empezar ahora</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="hero-escena">
+    <div class="hero-col">
+      <h1 class="display hero-title" data-reveal="up-lg" style="--rv-delay:.1s">
+        <span class="line">Convertí</span>
+        <span class="line">tus clientes</span>
+        <span class="line">en <em>fans</em></span>
+      </h1>
+    </div>
+
+    <div class="hero-art" aria-hidden="true">
+      <span class="phone phone-back" data-parallax="0.085">
+        <img src={ruta("/img/hero-phone-back.webp")} width="651" height="1231" alt="" loading="eager" />
+      </span>
+      <span class="phone phone-front" data-parallax="0.055">
+        <img src={ruta("/img/hero-phone-front.webp")} width="750" height="1460" alt="" loading="eager" />
+      </span>
+    </div>
+  </div>
+
+  <div class="hero-wave" aria-hidden="true" data-parallax="0.05" data-wave="12">
+    <div class="onda"><img src={ruta("/decor/wave-top-light.svg")} alt="" /></div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    background: var(--deep);
+    isolation: isolate;
+    /* El alto sale del contenido: el titular y los celulares. La sombra de los
+       celulares asoma por debajo sin recortarse (el hero ya no recorta).
+       La sección siguiente arranca pegada, sin margen. */
+    padding-bottom: 0;
+  }
+
+  /* --- fondo: a pantalla completa --- */
+  /* Este recorte es el que contiene los glows; el hero no recorta, para
+     que la sombra de los celulares pueda asomar por abajo. */
+  .hero-glows { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+  .glow { position: absolute; max-width: none; }
+  /* En el Figma la imagen de este glow va en (-290, -265.5) con 2019.5px de
+     ancho sobre un frame de 1440: la banda luminosa queda pegada al borde
+     superior de la pantalla. El 'top' se mide en vw y no en %, porque un
+     porcentaje se resolvería contra el ALTO del hero y lo dejaba 150px abajo. */
+  .glow-bar { left: -20.14%; top: -18.44vw; width: 140.24%; }
+  .glow-blob {
+    left: 50%; top: 41%;
+    width: 91.9%;
+    translate: 0 var(--py, 0);
+    transform: translateX(-50%) rotate(15.34deg);
+  }
+  /* Abajo a la izquierda, lejos del titular: ahí el azul quedaba liso. */
+  .glow-aura {
+    left: -12%; top: 48%;
+    width: 56%;
+    aspect-ratio: 1.3;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(50 150 153 / .26), transparent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Los tres a distinta velocidad y en desfase. Períodos largos y primos
+       entre sí: el ciclo completo no se repite a la vista, que es lo que hace
+       que parezca luz y no un loop. */
+    .glow-bar  { animation: hero-bar 29s ease-in-out infinite; }
+    .glow-blob { animation: hero-blob 24s ease-in-out -6s infinite; }
+    .glow-aura { animation: hero-aura 34s ease-in-out -11s infinite; }
+  }
+
+  /* `glow-blob` lleva el parallax en `translate` y el centrado en `transform`,
+     así que la animación va en `transform` (repitiendo el centrado, si no lo
+     pisa) y en `scale`, y deja `translate` libre. */
+  @keyframes hero-bar {
+    0%, 100% { translate: 0 0;          opacity: 1; }
+    50%      { translate: 2.5% -1.2%;   opacity: .82; }
+  }
+  @keyframes hero-blob {
+    0%, 100% { transform: translateX(-50%) rotate(15.34deg); scale: 1; }
+    40%      { transform: translateX(-53%) rotate(11deg);    scale: 1.08; }
+    70%      { transform: translateX(-47%) rotate(19deg);    scale: .96; }
+  }
+  @keyframes hero-aura {
+    0%, 100% { translate: 0 0;      scale: 1;    opacity: .9; }
+    45%      { translate: 9% -7%;   scale: 1.18; opacity: 1; }
+    75%      { translate: -4% 6%;   scale: .94;  opacity: .8; }
+  }
+
+  /* --- header --- */
+  .nav { position: relative; z-index: 4; padding-top: 21px; }
+  /* `wrap` para que en pantallas angostas los links bajen a su propia fila en
+     vez de desaparecer: sin menú hamburguesa, esconderlos dejaría al visitante
+     de celular sin navegación. */
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    padding-block: 8px;
+  }
+  .nav-logo img { width: 123px; height: auto; }
+  .nav-actions { display: flex; align-items: center; gap: 20px; }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: clamp(14px, 1.9vw, 28px);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .nav-links a {
+    position: relative;
+    padding-block: 6px;
+    color: rgb(255 255 255 / .74);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color .25s var(--ease-rv);
+  }
+  .nav-links a:hover,
+  .nav-links a:focus-visible { color: #fff; }
+  /* Subrayado que crece desde la izquierda. Va en `scale` y no en `width`
+     para que no recalcule el layout del header en cada frame. */
+  .nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    scale: 0 1;
+    transform-origin: left center;
+    transition: scale .25s var(--ease-rv);
+  }
+  .nav-links a:hover::after,
+  .nav-links a:focus-visible::after { scale: 1 1; }
+
+  /* --- escena: el contenido, centrado y topado en 1366px --- */
+  .hero-escena {
+    position: relative;
+    z-index: 2;
+    width: var(--escena);
+    margin-inline: auto;
+  }
+
+  /* El titular usa todo el ancho del contenido para que la línea más larga
+     ("tus clientes") llegue casi al borde de la pantalla. */
+  .hero-col {
+    width: 100%;
+    margin-inline: auto;
+    padding-top: calc(var(--escena) * 0.0743);   /* 95/1280 */
+  }
+  .hero-title {
+    color: var(--indigo);
+    /* Calibrado sobre la línea más larga: "tus clientes" mide 6.6 px de ancho
+       por cada px de cuerpo, así que 0.1486 del ancho del contenido la deja
+       ocupando ~98% de la columna. */
+    font-size: clamp(34px, calc(var(--escena) * 0.1486), 210px);
+    line-height: 0.882;                                            /* 142/161 */
+  }
+  .hero-title em { font-style: normal; color: #fff; }
+
+  /* --- celulares --- */
+  /* Van en el flujo (no absolutos) para que el alto del hero los contenga
+     enteros, con sombra incluida; el margen negativo los monta sobre el
+     titular como en el Figma. Son ~25% más grandes que en el diseño. */
+  .hero-art {
+    position: relative;
+    z-index: 3;
+    height: calc(var(--escena) * 0.584);    /* alto del celular de adelante */
+    margin-top: calc(var(--escena) * -0.15);  /* se montan sobre el titular */
+    pointer-events: none;
+  }
+  /* El wrapper lleva la deriva con el scroll; la imagen, el flote y la
+     rotación. Separados para que las dos animaciones no se pisen. */
+  .phone { position: absolute; display: block; translate: 0 var(--py, 0); }
+  .phone > img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 24px 48px rgb(6 2 40 / .42));
+  }
+  .phone-back  { right: 21%; top: calc(var(--escena) * 0.0672); width: 24.5%; }
+  .phone-front { right: 3.5%; top: 0; width: 30%; }
+  .phone-back > img { --rot: -6.41deg; rotate: var(--rot); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Entran al cargar y después quedan flotando, cada uno a su ritmo. */
+    .phone > img {
+      animation:
+        telefono-entra .95s var(--ease-rv) both,
+        telefono-flota 7s ease-in-out infinite;
+    }
+    .phone-front > img { animation-delay: .15s, 1.2s; }
+    .phone-back  > img { animation-delay: 0s, 1.9s; animation-duration: .95s, 8.6s; }
+  }
+
+  @keyframes telefono-entra {
+    from { opacity: 0; translate: 0 110px; rotate: calc(var(--rot, 0deg) + 5deg); }
+    to   { opacity: 1; translate: 0 0;     rotate: var(--rot, 0deg); }
+  }
+  @keyframes telefono-flota {
+    0%, 100% { translate: 0 0;     rotate: var(--rot, 0deg); }
+    50%      { translate: 0 -14px; rotate: calc(var(--rot, 0deg) + .7deg); }
+  }
+
+  /* --- onda inferior: a pantalla completa --- */
+  /* La zona clara arranca a 649px del tope y sigue hasta el final del hero;
+     los primeros 300px son la onda (649/1280 y 300/1280). */
+  .hero-wave {
+    position: absolute;
+    z-index: 1;
+    left: 0; right: 0;
+    top: calc(var(--escena) * 0.5070);
+    bottom: 0;
+    translate: 0 var(--py, 0);
+  }
+  /* El recorte de la onda va en .onda (para el corrimiento horizontal), NO en
+     .hero-wave: si no, también recortaría el relleno de abajo y asomaría el
+     fondo oscuro del hero en el borde. */
+  /* Cada onda de la página late con su propio período y arranca en otra fase,
+     así no se mueven todas juntas como una sola cinta. */
+  .hero-wave .onda { height: calc(var(--escena) * 0.2344); --onda-dur: 15s; }
+  .hero-wave::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: calc(var(--escena) * 0.2332);
+    /* Se extiende más allá del hero: la onda deriva hasta 60px hacia arriba
+       con el scroll y, sin este margen, asoma el fondo oscuro por debajo. */
+    bottom: -80px;
+    background: var(--page);
+  }
+
+  /* ======================= responsive ======================= */
+
+  @media (max-width: 900px) {
+    .hero { padding-bottom: 0; }
+    .hero-col { padding-top: 56px; }
+    .hero-escena { padding-bottom: 0; }
+
+    .hero-art {
+      height: auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      margin-top: 36px;
+      padding-bottom: 8px;
+    }
+    .phone { position: static; translate: none; }
+    .phone-back  { width: 196px; margin-right: -40px; }
+    .phone-front { width: 240px; }
+
+    .hero-wave { position: static; translate: none; }
+    .hero-wave .onda { height: 72px; }
+    .hero-wave::after { display: none; }
+  }
+
+  /* Los seis links ya no entran en una línea junto al logo y los botones:
+     pasan a una fila propia, a lo ancho. */
+  @media (max-width: 1120px) {
+    .nav-links {
+      order: 1;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .nav-actions { gap: 10px; }
+    .nav-actions .btn { padding: 10px 12px; }
+    .nav-logo img { width: 98px; }
+    .phone-back  { width: 148px; margin-right: -30px; }
+    .phone-front { width: 182px; }
+    .hero-wave .onda { height: 52px; }
+  }
+</style>

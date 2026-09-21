@@ -1,0 +1,150 @@
+---
+import { ruta } from "../lib/ruta";
+// "Empresas que confían en nosotros" — logos dispuestos alrededor del sticker.
+// Posiciones en % sobre el ancho de referencia del Figma (1440px).
+import StickerPeel from "./StickerPeel.astro";
+
+/* El nombre no siempre es lo que dice el logo: Capriccio es "Capriccio
+   Helados", y de Café Suárez sólo va el nombre, sin el resto de la leyenda que
+   trae la imagen. Es el texto que aparece al pasar por encima y también el alt
+   de cada logo, así que los dos dicen lo mismo. */
+const logos = [
+  { src: ruta("/img/clientes/esquina-cantina.webp"), nombre: "Esquina Cantina",   clase: "l1", desde: "left" },
+  { src: ruta("/img/clientes/capriccio.webp"),       nombre: "Capriccio Helados", clase: "l2", desde: "right" },
+  { src: ruta("/img/clientes/cliente-3.webp"),       nombre: "Club Café",         clase: "l3", desde: "left" },
+  { src: ruta("/img/clientes/cafe-suarez.webp"),     nombre: "Café Suárez",       clase: "l4", desde: "right" },
+];
+---
+
+<section class="clientes">
+  <div class="container">
+    <h2 class="section-title" data-reveal="up">
+      <span class="line">Empresas que</span>
+      <span class="line accent">confían en nosotros</span>
+    </h2>
+
+    <div class="escena">
+      <span class="sticker">
+        <!-- Este no se despega con el scroll: está quieto, con la punta
+             derecha apenas levantada. -->
+        <StickerPeel src={ruta("/img/sticker-strix.webp")} width={1400} height={513} alt="strix"
+          giro="-4deg" modo="punta" angulo={22} corte={12} aplanado={0.5} fijo={1} />
+      </span>
+      {
+        logos.map((l, i) => (
+          <span
+            class={`logo ${l.clase}`}
+            data-reveal={l.desde}
+            style={`--rv-delay:${i * 0.12}s`}
+          >
+            <img src={l.src} alt={l.nombre} loading="lazy" />
+            {/* Duplica al alt, así que para un lector de pantalla se oculta. */}
+            <span class="logo-nombre" aria-hidden="true">{l.nombre}</span>
+          </span>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .clientes { position: relative; background: #fff; padding-block: 88px 64px; }
+
+  .escena { position: relative; margin-top: 24px; aspect-ratio: 1280 / 700; }
+
+  .sticker {
+    display: block;
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 29.5%;  /* la mitad del tamaño anterior */
+    transform: translate(-50%, -50%);
+  }
+
+  /* El logo pasó a ser un envoltorio con la imagen y el nombre adentro. Cada
+     nivel se queda con un canal de transformación, que son de un solo valor:
+     el envoltorio lleva la entrada (`translate`/`scale` del data-reveal) y el
+     flote (`transform`); la imagen, el levantarse al pasar por encima. Si el
+     hover viviera en el envoltorio le pisaría el `translate` a la entrada. */
+  .logo { position: absolute; display: block; }
+  .logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 0 6px 20px rgb(31 41 55 / .08);
+    transition: translate .35s var(--ease-rv), scale .35s var(--ease-rv),
+      box-shadow .35s var(--ease-rv);
+  }
+
+  /* El nombre: abajo del logo, y no se muestra hasta que se lo señala. */
+  .logo-nombre {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    translate: -50% 4px;
+    padding: 6px 12px;
+    border-radius: var(--r-full);
+    background: var(--dark);
+    color: #fff;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s var(--ease-rv), translate .25s var(--ease-rv);
+  }
+  .logo:hover .logo-nombre { opacity: 1; translate: -50% 10px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .logo:hover img {
+      translate: 0 -12px;
+      scale: 1.07;
+      box-shadow: 0 18px 34px rgb(31 41 55 / .18);
+    }
+
+    /* El flote va en `transform` y no en `translate` a propósito: `translate`
+       ya lo usan la entrada (data-reveal) y el hover, y una animación le gana
+       a las dos, así que el logo no entraría ni se levantaría al señalarlo.
+       `transform` está libre y se compone con ellas sin pisarlas. */
+    .logo { animation: flotar var(--flota-dur, 8s) ease-in-out var(--flota-fase, 0s) infinite; }
+  }
+
+  /* Ida y vuelta por distinto camino: un sube-y-baja simple se lee como un
+     resorte, no como algo flotando. */
+  @keyframes flotar {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% {
+      transform: translate(3px, calc(var(--flota-y, 10px) * -1))
+                 rotate(var(--flota-rot, 1.6deg));
+    }
+    66% {
+      transform: translate(-3px, calc(var(--flota-y, 10px) * -0.4))
+                 rotate(calc(var(--flota-rot, 1.6deg) * -0.7));
+    }
+  }
+
+  /* Cada uno con su período, su fase y su amplitud: con los cuatro iguales
+     parecen colgados de la misma barra. */
+  .l1 { left: 3.9%;  top: 16.4%; width: 15.2%; --flota-dur: 7.5s; --flota-fase: -0.8s; --flota-y: 11px; }
+  .l2 { left: 67.6%; top: 2.9%;  width: 14.1%; --flota-dur: 9.2s; --flota-fase: -3.4s; --flota-y: 8px;  --flota-rot: 1.2deg; }
+  .l3 { left: 26.6%; top: 71.4%; width: 12.5%; --flota-dur: 6.4s; --flota-fase: -5.1s; --flota-y: 13px; --flota-rot: 2deg; }
+  .l4 { left: 70.7%; top: 65.7%; width: 13.3%; --flota-dur: 8.6s; --flota-fase: -2.2s; --flota-y: 9px;  --flota-rot: 1.4deg; }
+
+  @media (max-width: 720px) {
+    .clientes { padding-block: 56px 40px; }
+    .escena {
+      aspect-ratio: auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      margin-top: 36px;
+    }
+    .sticker { position: static; width: min(52%, 190px); transform: none; flex-basis: 100%; margin-inline: auto; }
+    /* `relative` y no `static`: el nombre va posicionado contra el logo. */
+    .logo { position: relative; width: 96px; }
+  }
+</style>

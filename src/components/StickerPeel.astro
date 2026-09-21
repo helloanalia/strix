@@ -1,0 +1,284 @@
+---
+/**
+ * Sticker despegado.
+ *
+ * La imagen se parte en dos con una LÍNEA DE CORTE inclinada:
+ *   - el CUERPO es lo que sigue pegado;
+ *   - la SOLAPA es la parte despegada, espejada sobre la línea. No muestra el
+ *     arte: muestra el REVERSO del sticker, el papel blanco recortado con la
+ *     forma exacta de la imagen (se usa la propia imagen como máscara).
+ *
+ * Dos modos:
+ *   - "banda": se suelta la franja de arriba y cae doblada sobre el resto.
+ *     Pensado para el sticker que se despega con el scroll.
+ *   - "punta": se levanta sólo la punta derecha, apenas. Para los stickers
+ *     quietos, que no se despegan pero tampoco están del todo pegados.
+ *
+ * El corte NUNCA va paralelo al borde: un corte recto a lo ancho se lee como
+ * un recorte de la imagen, no como algo que se está despegando. De ahí
+ * `angulo`, que lo inclina respecto del sticker.
+ *
+ * La SOLAPA no lleva sombra (a pedido). El cuerpo sí lleva una muy suave,
+ * porque esta versión del sticker es plana y no trae sombra propia: sin ella
+ * no se lee como algo apoyado sobre la página.
+ *
+ * `--peel` (0 → 1) es cuánto está despegado. Lo mueve el motor de scroll de
+ * Layout.astro vía `data-peel`, o queda fijo si se pasa `fijo`.
+ */
+interface Props {
+  src: string;
+  width: number;
+  height: number;
+  alt?: string;
+  /** "banda": se suelta la franja de arriba. "punta": se levanta la punta derecha. */
+  modo?: "banda" | "punta";
+  /** Inclinación del corte respecto del sticker, en grados. */
+  angulo?: number;
+  /** Cuánto avanza el corte: % del alto en "banda", % del ancho en "punta".
+   *  En "banda", pasado ~40% la solapa se come el arte. */
+  corte?: number;
+  /** Cuánto se acorta la solapa al caer (escorzo). Más alto = más acostada,
+   *  o sea menos levantada. */
+  aplanado?: number;
+  /** Velocidad del despegue por scroll. Sin esto el sticker no se anima.
+   *  Con 1 el despegue arranca cuando el sticker entra por abajo y termina
+   *  recién cuando se va por arriba; cuanto más alto, antes se completa. */
+  factor?: number;
+  /** Despegue fijo, 0 a 1, para los stickers sin animación. */
+  fijo?: number;
+  /** Inclinación del sticker entero. */
+  giro?: string;
+  clase?: string;
+}
+
+const {
+  src, width, height,
+  alt = "",
+  modo = "banda",
+  angulo = modo === "punta" ? 22 : 9,
+  corte = modo === "punta" ? 17 : 34,
+  aplanado = modo === "punta" ? 0.55 : 0.28,
+  factor,
+  fijo,
+  giro = "0deg",
+  clase = "",
+} = Astro.props;
+
+const RAD = Math.PI / 180;
+const punta = modo === "punta";
+
+/* Toda la geometría del corte se resuelve acá, en píxeles del arte, y recién
+   al final se pasa a % de la caja. Hacerla directamente en % deformaría el
+   ángulo: el sticker es casi tres veces más ancho que alto, así que un corte
+   de 9° escrito en porcentajes se vería como uno de 25°. */
+
+// Ángulo de la LÍNEA respecto del eje x (y crece hacia abajo).
+const linea = punta ? 90 - angulo : angulo;
+const tx = Math.cos(linea * RAD);
+const ty = Math.sin(linea * RAD);
+// Normal hacia el lado que se despega: arriba en "banda", derecha en "punta".
+const nx = ty;
+const ny = -tx;
+
+// Media caja medida sobre la normal: con la línea a esta distancia del centro,
+// el corte cae justo afuera del sticker y no hay nada despegado (--peel: 0).
+const alcance = (Math.abs(nx) * width + Math.abs(ny) * height) / 2;
+const avance = (corte / 100) * (punta ? width : height);
+
+// La línea arranca afuera y entra `avance` a medida que avanza --peel.
+const ox = width / 2 + nx * alcance;
+const oy = height / 2 + ny * alcance;
+const dx = -nx * avance;
+const dy = -ny * avance;
+
+// Lo suficientemente larga como para que la línea cruce la caja entera.
+const L = 3 * Math.max(width, height);
+
+const enX = (v: number) => +((v / width) * 100).toFixed(3);
+const enY = (v: number) => +((v / height) * 100).toFixed(3);
+
+/* Los cuatro vértices se corren todos lo mismo, así que el avance del corte
+   entra como un calc() sobre --peel y no hace falta recalcular nada en vivo. */
+const eje = (base: number, delta: number, a: (v: number) => number) =>
+  a(delta) === 0 ? `${a(base)}%` : `calc(${a(base)}% + var(--peel, 0) * ${a(delta)}%)`;
+const vertice = (p: number[]) => `${eje(p[0], dx, enX)} ${eje(p[1], dy, enY)}`;
+const poligono = (...ps: number[][]) => `polygon(${ps.map(vertice).join(", ")})`;
+
+const A = [ox - tx * L, oy - ty * L];
+const B = [ox + tx * L, oy + ty * L];
+const haciaFuera = (p: number[]) => [p[0] + nx * L, p[1] + ny * L];
+const haciaDentro = (p: number[]) => [p[0] - nx * L, p[1] - ny * L];
+
+const clipSolapa = poligono(A, B, haciaFuera(B), haciaFuera(A));
+const clipCuerpo = poligono(A, B, haciaDentro(B), haciaDentro(A));
+const origen = `${eje(ox, dx, enX)} ${eje(oy, dy, enY)}`;
+
+/* Espejado sobre la línea de corte: girar hasta dejarla horizontal, dar vuelta,
+   y volver. El escorzo (el -1 que se acerca a 0) es lo que hace que la solapa
+   se vea cayendo y no simplemente doblada. */
+const plegado =
+  `rotate(${+linea.toFixed(3)}deg) ` +
+  `scaleY(calc(-1 + var(--peel, 0) * ${aplanado})) ` +
+  `rotate(${+(-linea).toFixed(3)}deg)`;
+
+// Sombra del doblez: se dibuja sobre la línea, que retrocede junto con el corte.
+const angLuz = +(Math.atan2(nx, -ny) / RAD).toFixed(2);
+const doblez = +((avance / (2 * alcance)) * 100).toFixed(2);
+
+const estilo = [
+  `--giro:${giro}`,
+  `--src:url("${src}")`,
+  `--clip-cuerpo:${clipCuerpo}`,
+  `--clip-solapa:${clipSolapa}`,
+  `--origen:${origen}`,
+  `--plegado:${plegado}`,
+  `--ang-luz:${angLuz}deg`,
+  `--doblez:${doblez}%`,
+  fijo != null ? `--peel:${fijo}` : "",
+].filter(Boolean).join("; ");
+---
+
+<span
+  class:list={["peel", factor ? "peel-anima" : null, clase]}
+  data-peel={factor}
+  style={estilo}
+  aria-hidden={alt === "" ? "true" : undefined}
+>
+  <span class="peel-sombra" aria-hidden="true">
+    <span class="peel-silueta peel-recorte-cuerpo"></span>
+  </span>
+  <span class="peel-cuerpo">
+    <img src={src} width={width} height={height} alt={alt} loading="lazy" />
+  </span>
+  <span class="peel-sombra-alta" aria-hidden="true">
+    <span class="peel-silueta peel-recorte-solapa"></span>
+  </span>
+  <span class="peel-solapa" aria-hidden="true">
+    <span class="peel-reverso"></span>
+    <span class="peel-luz"></span>
+  </span>
+</span>
+
+<style>
+  .peel {
+    position: relative;
+    display: block;
+    /* Al despegarse se descuelga: baja unos píxeles y se inclina un poco más,
+       que es lo que hace sentir que se está cayendo y no sólo doblando. */
+    rotate: calc(var(--giro, 0deg) + var(--peel, 0) * 2.4deg);
+    translate: 0 calc(var(--peel, 0) * 16px);
+  }
+
+  .peel-cuerpo,
+  .peel-solapa,
+  .peel-sombra,
+  .peel-sombra-alta { display: block; }
+  .peel img { display: block; width: 100%; height: auto; }
+
+  /* Las sombras son DOS, una por cada pedazo, y cada una se recorta con la
+     misma forma que el pedazo que la proyecta: así la sombra se va abriendo a
+     medida que el sticker se despega en vez de quedar con la silueta entera.
+
+     El desenfoque va en la capa de AFUERA y el recorte en la de adentro. Si
+     fueran el mismo elemento, el navegador desenfoca primero y recorta después,
+     y el corte dibujaría una línea recta en el pliegue. */
+  .peel-sombra,
+  .peel-sombra-alta {
+    position: absolute;
+    inset: 0;
+  }
+
+  .peel-silueta {
+    position: absolute;
+    inset: 0;
+    background: rgb(18 10 56 / .26);
+    mask-image: var(--src);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--src);
+    -webkit-mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+  }
+
+  /* Lo que sigue pegado apoya sobre la página: sombra corta y pareja. */
+  .peel-sombra {
+    filter: blur(11px);
+    translate: 0 9px;
+  }
+  .peel-recorte-cuerpo { clip-path: var(--clip-cuerpo); }
+
+  /* La solapa está levantada, así que su sombra cae más lejos y más difusa
+     cuanto más despegada está, y se va lavando al separarse de la página. */
+  .peel-sombra-alta {
+    filter: blur(calc(7px + var(--peel, 0) * 11px));
+    translate: calc(var(--peel, 0) * 6px) calc(3px + var(--peel, 0) * 15px);
+    opacity: calc(1 - var(--peel, 0) * 0.3);
+  }
+  .peel-recorte-solapa {
+    clip-path: var(--clip-solapa);
+    transform-origin: var(--origen);
+    transform: var(--plegado);
+  }
+
+  /* Lo que sigue pegado: el lado de adentro de la línea de corte.
+     `position: relative` para que se pinte por encima de la capa de sombra. */
+  .peel-cuerpo {
+    position: relative;
+    clip-path: var(--clip-cuerpo);
+  }
+
+  /* Lo despegado: el lado de afuera de la línea, espejado sobre ella. */
+  .peel-solapa {
+    position: absolute;
+    inset: 0;
+    clip-path: var(--clip-solapa);
+    transform-origin: var(--origen);
+    transform: var(--plegado);
+  }
+
+  /* Reverso del sticker: papel, no metal. La imagen se usa como máscara, así
+     el papel toma exactamente su silueta troquelada. */
+  .peel-reverso {
+    position: absolute;
+    inset: 0;
+    background: #fafbfe;
+    mask-image: var(--src);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--src);
+    -webkit-mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+  }
+
+  /* Sombra del doblez: oscurece pegado a la línea de corte y se va aclarando
+     hacia el borde libre, que es la parte que quedó más lejos de la página.
+     El stop viaja con --peel porque la línea también se mueve. */
+  .peel-luz {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      var(--ang-luz),
+      rgb(255 255 255 / .6) calc(100% - var(--peel, 0) * var(--doblez) * 2.4),
+      rgb(138 150 174 / .3) calc(100% - var(--peel, 0) * var(--doblez)),
+      rgb(150 162 186 / .07) 100%
+    );
+    mask-image: var(--src);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--src);
+    -webkit-mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    pointer-events: none;
+  }
+
+  /* Sin animación el sticker queda entero, como si nunca se hubiera tocado.
+     Los que están quietos con una punta levantada no se tocan: eso no es
+     movimiento, es cómo está puesto el sticker. */
+  @media (prefers-reduced-motion: reduce) {
+    .peel-anima .peel-cuerpo,
+    .peel-anima .peel-recorte-cuerpo { clip-path: none; }
+    .peel-anima .peel-solapa,
+    .peel-anima .peel-sombra-alta { display: none; }
+    .peel-anima .peel-sombra { filter: blur(9px); translate: 0 7px; }
+  }
+</style>

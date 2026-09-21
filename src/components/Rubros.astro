@@ -1,0 +1,114 @@
+---
+import { ruta } from "../lib/ruta";
+const rubros = [
+  { slug: "gastronomia", titulo: "Gastronomía", texto: "Cafés, restaurantes, bares, panaderías", tono: "orange",
+    alt: "Mesa de un bar con gente comiendo hamburguesas" },
+  { slug: "belleza", titulo: "Belleza", texto: "Peluquerías, centros de estética, salones", tono: "pink",
+    alt: "Clientas esperando en el salón de una peluquería" },
+  { slug: "deporte", titulo: "Deporte", texto: "Gimnasios, canchas, espacios de fitness", tono: "yellow",
+    alt: "Persona entrando a un club de pádel con su paleta" },
+  { slug: "salud", titulo: "Salud", texto: "Farmacias, veterinarias, consultorios", tono: "green",
+    alt: "Cliente eligiendo una correa en una veterinaria" },
+  { slug: "retail", titulo: "Retail", texto: "Tiendas, boutiques, negocios de barrio", tono: "red",
+    alt: "Interior de una tienda de ropa con maniquíes" },
+  { slug: "servicios", titulo: "Servicios", texto: "Lavanderías, talleres, cualquier servicio recurrente", tono: "violet",
+    alt: "Auto pasando por un lavadero automático" },
+];
+---
+
+<section class="rubros" id="industrias">
+  <div class="container">
+    <header class="rubros-head" data-reveal="up-md">
+      <h2 class="section-title">
+        <span class="line">Los fans no son solo</span>
+        <span class="line">de <span class="accent">marcas globales</span></span>
+      </h2>
+      <p class="lead">
+        Cualquier negocio donde el cliente puede volver tiene potencial de fidelización. La
+        diferencia está en si lo trabajás o lo dejás al azar.
+      </p>
+    </header>
+
+    <ul class="grid">
+      {
+        rubros.map((r, i) => (
+          <li class={`card tono-${r.tono}`} data-reveal="up" style={`--rv-delay:${i * 0.1}s`}>
+            <div class="card-foto">
+              <img src={ruta(`/img/rubros/${r.slug}.webp`)} width="900" height="491" alt={r.alt} loading="lazy" />
+            </div>
+            <div class="card-cuerpo">
+              <span class="card-icono">
+                <img src={ruta(`/icons/${r.slug}.svg`)} width="24" height="24" alt="" />
+              </span>
+              <div class="card-texto">
+                <h3>{r.titulo}</h3>
+                <p>{r.texto}</p>
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* En el Figma el fondo no es plano: va de blanco a #eef1f5 (node 303912:20972). */
+  .rubros {
+    position: relative;
+    background: linear-gradient(#ffffff, #eef1f5);
+    padding-block: 40px 112px;
+  }
+
+  .rubros-head { position: relative; z-index: 1; max-width: 800px; display: grid; gap: 20px; padding-top: calc(var(--escena) * 0.1406); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 43px;
+    margin: 56px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgb(31 41 55 / .05);
+  }
+  .card-foto { padding: 8px 8px 0; }
+  .card-foto img { width: 100%; height: 200px; object-fit: cover; border-radius: var(--r-lg); }
+
+  .card-cuerpo { display: flex; align-items: flex-start; gap: 16px; padding: 20px 20px 24px; }
+  .card-icono {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 44px; height: 44px;
+    border-radius: var(--r-xl);
+  }
+  .card-texto h3 { margin: 0 0 4px; font-size: 24px; font-weight: 600; line-height: 1.2; color: var(--fg); }
+  .card-texto p { margin: 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+
+  .tono-orange .card-icono { background: var(--orange-100); }
+  .tono-pink   .card-icono { background: var(--pink-100); }
+  .tono-yellow .card-icono { background: var(--yellow-100); }
+  .tono-green  .card-icono { background: var(--green-100); }
+  .tono-red    .card-icono { background: var(--red-100); }
+  .tono-violet .card-icono { background: var(--violet-100); }
+
+  @media (max-width: 1000px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+    .rubros-head { padding-top: 96px; }
+  }
+  @media (max-width: 640px) {
+    .rubros { padding-block: 24px 72px; }
+    .grid { grid-template-columns: 1fr; gap: 20px; }
+    .rubros-head { padding-top: 72px; }
+    .card-foto img { height: 168px; }
+  }
+</style>

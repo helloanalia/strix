@@ -1,0 +1,276 @@
+---
+import { ruta } from "../lib/ruta";
+// Banner "Que vuelvan no es casualidad... es estrategia" — base #1A0D72.
+import StickerPeel from "./StickerPeel.astro";
+---
+
+<section class="banner">
+  <!-- Toda la región azul es UNA sola pieza. El navy y los blurs se pintan de
+       corrido de punta a punta, y la silueta de las ondas se recorta con una
+       máscara de tres bandas (curva de arriba + rectángulo + curva de abajo).
+
+       Antes las ondas eran dos imágenes planas de navy pintadas aparte del
+       cuerpo: el degradado vivía sólo en el cuerpo y moría contra ellas, así
+       que se veía cortado justo donde empezaba cada onda. Recortando en vez de
+       pintar, el blur cruza la curva sin enterarse de que está ahí. -->
+  <div
+    class="banner-azul"
+    aria-hidden="true"
+    data-wave="6"
+    style={`--onda-arriba:url("${ruta("/decor/wave-top-banner.svg")}"); --onda-abajo:url("${ruta("/decor/wave-bottom-banner.svg")}")`}
+  >
+    <div class="glows">
+      <span class="g1"></span>
+      <span class="g2"></span>
+    </div>
+    <span class="grano"></span>
+  </div>
+
+  <!-- Sólo ocupan el alto de cada onda: la silueta la dibuja la máscara. -->
+  <div class="franja franja-top" aria-hidden="true"></div>
+
+  <div class="banner-body">
+    <div class="container">
+      <p class="display banner-texto" data-reveal="scale-lg">
+        <span class="line">Que vuelvan</span>
+        <span class="line">no es</span>
+        <span class="line">casualidad…</span>
+        <span class="line">es <em>estrategia.</em></span>
+      </p>
+    </div>
+  </div>
+
+  <div class="franja franja-bot" aria-hidden="true"></div>
+
+  <!-- El sticker cruza la onda: mitad sobre el banner, mitad sobre la sección
+       clara de abajo (en el Figma: centro en y=5017, borde del banner en 5007). -->
+  <span class="banner-sticker" aria-hidden="true">
+    <StickerPeel src={ruta("/img/sticker-strix.webp")} width={1400} height={513} giro="-10.64deg"
+      modo="punta" angulo={24} corte={24} aplanado={0.42} factor={1.15} />
+  </span>
+</section>
+
+<style>
+  .banner {
+    /* Alto de cada onda, sacado de su SVG: 207/1440 y 186/1440 del ancho de
+       pantalla. Lo usan las franjas que ocupan el lugar y las bandas de la
+       máscara, y tienen que coincidir exactamente o queda un filo. Por eso van
+       en vw las dos y no en `aspect-ratio`: así no dependen de que la sección
+       mida exactamente 100vw (con barra de scroll, no mide eso). */
+    --onda-top: 14.375vw;
+    --onda-bot: 12.9167vw;
+
+    position: relative;
+    z-index: 2;
+    /* Solo en horizontal: el sticker tiene que seguir asomando por abajo para
+       cruzar la onda, pero no puede generar scroll lateral. */
+    overflow-x: clip;
+    /* La onda mide 207/1440 del ancho de pantalla; el solape la supera para que
+       el borde inferior del panel NUNCA asome por debajo de ella. */
+    margin-top: calc(-14.4vw - 48px);
+    color: var(--indigo);
+  }
+
+  /* Reservan el alto de cada onda. No pintan nada: la silueta sale de la
+     máscara de .banner-azul, y por encima de la curva de arriba tiene que
+     verse lo que hay detrás (el panel de la sección anterior). */
+  .franja-top { height: var(--onda-top); }
+  .franja-bot { height: var(--onda-bot); }
+
+  /* --- sticker que cruza la onda inferior --- */
+  /* El sticker va CENTRADO sobre el filo de la onda: mitad sobre el azul,
+     mitad sobre la sección clara de abajo.
+
+     Las medidas salen del propio SVG de la onda, que mide 1440x186 y va a todo
+     el ancho, así que su alto es 12.9167vw. A la altura del centro del sticker
+     (65% del ancho) el filo del azul pasa a 21.2 de sus 186 unidades por
+     encima del borde inferior de la sección: 11.398% de 12.9167vw = 1.4723vw.
+     El sticker mide 29.5vw de ancho y el arte es 1400x513, o sea 10.81vw de
+     alto; hay que subirle la mitad para que el filo le pase por el medio. */
+  .banner-sticker {
+    display: block;
+    position: absolute;
+    z-index: 3;
+    left: 50.25%;
+    bottom: calc(1.4723vw - 10.8096vw / 2);
+    width: 29.5%;
+    pointer-events: none;
+  }
+
+  /* Ya no pinta nada: sólo sostiene el texto. El azul lo pone .banner-azul. */
+  .banner-body {
+    position: relative;
+    padding-block: 40px 72px;
+  }
+
+  /* La pieza azul entera, recortada con la silueta de las dos ondas.
+
+     La máscara es FIJA y el movimiento va por `transform`. Es la diferencia
+     entre que ande y que no: mover la onda con `mask-position` obliga al
+     navegador a volver a rasterizar la máscara de esta capa —que mide toda la
+     sección— en cada cuadro del scroll, y alcanza a mostrar mosaicos a medio
+     pintar. Eso es el parpadeo que se veía. Un `transform` se resuelve en el
+     compositor sobre la capa ya rasterizada y no toca la máscara.
+
+     Al correr la capa entera se mueven con ella el navy y los glows, pero eso
+     no se nota: el navy es plano y los glows son círculos enormes y difusos.
+     Lo único que se ve moverse es la curva, que es de lo que se trata.
+
+     Por eso también sobresale 9vw de cada lado: al correrse, si midiera justo
+     la sección quedaría una franja transparente contra el borde. */
+  .banner-azul {
+    position: absolute;
+    inset: 0 -9vw;
+    z-index: 0;
+    overflow: hidden;
+    background: var(--navy);
+
+    /* Las dos ondas llegan como variables desde el markup: dentro de un
+       <style> no se puede resolver la base del sitio, así que la ruta se armá
+       arriba y entra por acá. */
+    mask-image: var(--onda-arriba), linear-gradient(#000, #000), var(--onda-abajo);
+    mask-repeat: no-repeat;
+    /* La banda del medio se pasa 4px para cada lado.
+       Con 1px no alcanzaba: los bordes de las bandas caen en píxeles
+       fraccionarios (165.334px, 565.666px…), así que en esa única fila de
+       solape cada banda aporta alfa parcial, y sumadas no siempre llegan a 1.
+       Quedaba una fila semitransparente cruzando todo el ancho — la línea
+       clara que se veía. Con 4px, la fila fraccionaria de cada banda cae bien
+       adentro de la zona sólida de la otra.
+       Solapar más no cambia la silueta: en el borde donde se tocan, las dos
+       ondas ya están rellenas de lado a lado (la de arriba baja hasta el pie
+       de su banda, la de abajo arranca desde el techo de la suya). */
+    /* El ancho de las ondas va en vw y NO en % de esta capa: la capa sobresale
+       9vw de cada lado, así que un 128% de ella dejaba a la vista sólo el 66%
+       central del dibujo en vez del 81% que se veía antes del refactor. El
+       recorte más angosto caía sobre un tramo casi horizontal de la curva, y
+       contra el borde derecho de la pantalla la onda entraba como una línea
+       recta: eso era la "línea blanca que atraviesa la sección".
+       124vw es el ancho que tenía el SVG cuando era una imagen (124% de la
+       pantalla), así que recorta el mismo tramo de curva que antes. */
+    mask-size:
+      124vw var(--onda-top),
+      100% calc(100% - var(--onda-top) - var(--onda-bot) + 8px),
+      124vw var(--onda-bot);
+    /* Fija y centrada. Acá el 50% sí es el atajo correcto: con la máscara
+       quieta, "alineá el centro de la imagen con el centro de la caja" es
+       exactamente lo que hace falta. */
+    mask-position: 50% top, 0 calc(var(--onda-top) - 4px), 50% bottom;
+
+    /* El corrimiento del scroll, sin animación propia encima. */
+    transform: translateX(calc(var(--wxn, 0) * 1vw));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .banner-azul { animation: onda-banner 19s ease-in-out infinite; }
+  }
+  /* Vuelve a leer --wxn en cada cuadro, así el vaivén propio se suma al del
+     scroll en vez de pisarlo. Entre los dos no pasan de 7vw (6 del scroll, 1
+     del vaivén), que es lo que entra en los 9vw que sobresale la capa. */
+  @keyframes onda-banner {
+    0%, 100% { transform: translateX(calc(var(--wxn, 0) * 1vw - 1vw)); }
+    50%      { transform: translateX(calc(var(--wxn, 0) * 1vw + 1vw)); }
+  }
+
+  /* Los glows ya no llevan máscara propia ni se recortan contra nada: viven
+     dentro de la pieza azul, así que la silueta de las ondas los recorta junto
+     con el navy y el degradado cruza la curva de corrido.
+     Colores de ellipse145 (#545FFF) y ellipse144 (#5471FF → #329699). */
+  .glows {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .glows span {
+    position: absolute;
+    width: var(--d);
+    height: var(--d);
+    border-radius: 50%;
+    /* `closest-side` apaga el color en el borde del círculo, así el degradado
+       llega a transparente justo donde termina la forma. */
+    background: radial-gradient(closest-side, var(--c), transparent);
+  }
+  /* Dos, enormes y cortados por la mitad contra los bordes de la pantalla.
+
+     El diámetro va en `vw` —el mismo valor para ancho y alto— así salen
+     redondos en cualquier pantalla, y el tamaño es libre: los recorta la
+     silueta de la pieza azul, no una máscara que los apague antes de tiempo.
+
+     El `top` es % de la región azul ENTERA, que ahora incluye las dos bandas
+     de onda: por eso los números no son los mismos que cuando la referencia
+     era sólo el cuerpo.
+
+     El margen negativo de medio diámetro corre cada uno hasta dejar su CENTRO
+     sobre el borde: `left: 0` con ese margen deja el centro en el borde
+     izquierdo y se ve la mitad derecha; `left: 100%`, el centro en el derecho
+     y se ve la mitad izquierda.
+
+     El de la izquierda cae detrás del titular, que es índigo: si el glow
+     también es índigo no se ve, se lo come el texto. Violeta se despega. */
+  .g1 {
+    --d: 98vw;
+    --c: rgb(124 84 245 / .78);
+    /* El 9vw compensa lo que la capa sobresale, para que el centro del círculo
+       siga cayendo sobre el borde de la pantalla y no 9vw más afuera. */
+    left: 9vw; top: 36%;
+    margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+  }
+  .g2 {
+    --d: 86vw;
+    --c: rgb(64 200 190 / .6);
+    left: calc(100% - 9vw); top: 52%;
+    margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+  }
+
+  /* Grano: los degradados grandes sobre un fondo oscuro se cortan en franjas
+     en pantallas de 8 bits, y este panel es el caso perfecto. Un ruido muy
+     tenue las rompe. Ya no necesita desvanecerse en los bordes: lo recorta la
+     silueta igual que a todo lo demás. */
+  .grano {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: .05;
+    mix-blend-mode: overlay;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Lento y de recorrido corto: son enormes, y una masa de ese tamaño
+       moviéndose rápido se nota como una animación. Lo que tiene que moverse
+       es el CRUCE de los dos, no cada uno; con períodos que no son múltiplos
+       entre sí (37 y 53) el cruce tarda minutos en repetirse igual. */
+    .g1 { animation: glow-1 37s ease-in-out infinite; }
+    .g2 { animation: glow-2 53s ease-in-out -19s infinite; }
+  }
+
+  /* Recorridos cortos: a este tamaño un 3% ya son decenas de píxeles, y una
+     masa así moviéndose de más se nota como una animación en vez de como luz. */
+  @keyframes glow-1 {
+    0%, 100% { translate: 0 0;       scale: 1; }
+    33%      { translate: 2.5% 2%;   scale: 1.05; }
+    66%      { translate: 1% -2.5%;  scale: .98; }
+  }
+  @keyframes glow-2 {
+    0%, 100% { translate: 0 0;       scale: 1; }
+    40%      { translate: -3% 1.5%;  scale: .97; }
+    70%      { translate: -1.5% -3%; scale: 1.06; }
+  }
+  .banner-body > .container { position: relative; z-index: 1; }
+
+  .banner-texto {
+    font-size: clamp(48px, 9.8vw, 141px);
+    line-height: 0.9;
+    letter-spacing: -0.015em;
+  }
+  .banner-texto em { font-style: normal; color: #fff; }
+
+  @media (max-width: 900px) {
+    .banner { margin-top: calc(-14.4vw - 16px); }
+    .banner-body { padding-block: 24px 48px; }
+    /* Mismo cálculo, con el sticker más grande y más a la izquierda: a 61% del
+       ancho el filo del azul pasa a 9.3/186 del borde (0.6458vw), y el sticker
+       mide 46vw de ancho por 16.856vw de alto. */
+    .banner-sticker { left: 38%; width: 46%; bottom: calc(0.6458vw - 16.856vw / 2); }
+  }
+</style>

@@ -1,0 +1,222 @@
+---
+import { ruta } from "../lib/ruta";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "strix — Convertí tus clientes en fans",
+  description =
+    "Programa de fidelización para tu negocio. Tus clientes suman sellos escaneando el QR de su factura, y vos ves todo desde un panel. Sin hardware ni integración con la caja.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="es_UY" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/svg+xml" href={ruta("/favicon.svg")} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@800;900&display=swap"
+    />
+  </head>
+  <body>
+    <slot />
+
+    <script>
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+      type Capa = {
+        el: HTMLElement;
+        fy: number; fw: number; fp: number;
+        base: number; alto: number;
+        py: number; wx: number; sy: number; pl: number;   // valores actuales (persiguen al objetivo)
+      };
+
+      const tope = (v: number, t: number) => Math.max(-t, Math.min(t, v));
+
+      function scrollFX() {
+        let pendientes = [...document.querySelectorAll<HTMLElement>("[data-reveal]")];
+
+        if (reduce.matches) {
+          pendientes.forEach((el) => el.classList.add("is-in"));
+          return;
+        }
+
+        /* Posición de cada capa medida UNA vez, sin su propio desplazamiento:
+           si se leyera el rect en cada frame, el efecto se realimentaría. */
+        let capas: Capa[] = [];
+
+        const pintar = (c: Capa) => {
+          c.el.style.setProperty("--py", `${c.py.toFixed(2)}px`);
+          c.el.style.setProperty("--wx", `${c.wx.toFixed(3)}%`);
+          c.el.style.setProperty("--wxn", c.wx.toFixed(3));
+          c.el.style.setProperty("--wsy", c.sy.toFixed(4));
+          c.el.style.setProperty("--peel", c.pl.toFixed(4));
+        };
+
+        const medir = () => {
+          /* Lo que cada capa venía animando, para no perderlo al re-medir.
+             Esto importa más de lo que parece: el ResizeObserver de abajo
+             dispara cada vez que una imagen lazy cambia el alto de la página,
+             o sea muchas veces durante la primera bajada. Si acá se reseteara
+             el estado a cero, el efecto se cortaría justo cuando el visitante
+             lo está mirando por primera vez — y daba la sensación de que las
+             ondas no se movían. */
+          const previo = new Map(capas.map((c) => [c.el, c]));
+
+          const sel = "[data-parallax], [data-wave], [data-peel]";
+          capas = [...document.querySelectorAll<HTMLElement>(sel)].map((el) => {
+            // En cero sólo para leer la posición sin el propio desplazamiento.
+            el.style.setProperty("--py", "0px");
+            el.style.setProperty("--wx", "0%");
+            el.style.setProperty("--wxn", "0");
+            el.style.setProperty("--wsy", "1");
+            el.style.setProperty("--peel", "0");
+            const r = el.getBoundingClientRect();
+
+            const antes = previo.get(el);
+            const c: Capa = {
+              el,
+              fy: Number(el.dataset.parallax) || 0,   // deriva vertical, en px
+              fw: Number(el.dataset.wave) || 0,       // corrimiento de la onda, en %
+              fp: Number(el.dataset.peel) || 0,       // despegue del sticker, 0 a 1
+              base: r.top + window.scrollY,
+              alto: r.height,
+              py: antes ? antes.py : 0,
+              wx: antes ? antes.wx : 0,
+              sy: antes ? antes.sy : 1,
+              pl: antes ? antes.pl : 0,
+            };
+            // Y se devuelven enseguida, antes de que se pinte un solo cuadro.
+            pintar(c);
+            return c;
+          });
+        };
+
+        const TOPE_Y = 60;     // px máximos de deriva vertical
+        const SEGUIR = 0.09;   // cuánto se acerca al objetivo por frame: más bajo = más pegajoso
+        const SUAVE = 0.12;    // suavizado de la velocidad de scroll
+
+        let velSuave = 0;
+        let ultimoY = window.scrollY;
+        let corriendo = false;
+
+        const frame = () => {
+          const y = window.scrollY;
+          const vh = window.innerHeight;
+
+          const vel = y - ultimoY;
+          ultimoY = y;
+          velSuave += (vel - velSuave) * SUAVE;
+
+          // Entradas: se revela todo lo que ya asomó en pantalla.
+          if (pendientes.length) {
+            const quedan: HTMLElement[] = [];
+            for (const el of pendientes) {
+              if (el.getBoundingClientRect().top < vh * 0.88) el.classList.add("is-in");
+              else quedan.push(el);
+            }
+            pendientes = quedan;
+          }
+
+          // ¿Hace falta seguir animando, o ya se asentó todo?
+          let sigue = Math.abs(velSuave) > 0.06;
+
+          for (const c of capas) {
+            const desvio = c.base - y + c.alto / 2 - vh / 2;
+
+            if (c.fy) {
+              const objetivo = tope(desvio * c.fy, TOPE_Y);
+              c.py += (objetivo - c.py) * SEGUIR;
+              if (Math.abs(objetivo - c.py) > 0.1) sigue = true;
+              c.el.style.setProperty("--py", `${c.py.toFixed(2)}px`);
+            }
+
+            if (c.fp) {
+              // 0 cuando el sticker entra por abajo, 1 cuando llega arriba.
+              const crudo = (0.5 - desvio / vh) * c.fp;
+              const objetivo = Math.max(0, Math.min(1, crudo));
+              c.pl += (objetivo - c.pl) * SEGUIR;
+              if (Math.abs(objetivo - c.pl) > 0.002) sigue = true;
+              c.el.style.setProperty("--peel", c.pl.toFixed(4));
+            }
+
+            if (c.fw) {
+              // Corrimiento: persigue al objetivo con retardo (de ahí lo pegajoso).
+              const objetivo = tope(desvio / vh, 1) * c.fw;
+              c.wx += (objetivo - c.wx) * SEGUIR;
+              if (Math.abs(objetivo - c.wx) > 0.02) sigue = true;
+              c.el.style.setProperty("--wx", `${c.wx.toFixed(3)}%`);
+              /* El mismo valor sin unidad: el banner lo usa dentro de
+                 `mask-position`, donde un porcentaje no significa "correte
+                 tanto" sino "alineá tal punto con tal otro", así que ahí hace
+                 falta multiplicarlo por una longitud. */
+              c.el.style.setProperty("--wxn", c.wx.toFixed(3));
+
+              // Estiramiento: la onda se alarga según lo rápido que vas. Es lo
+              // que más se nota de todo el efecto, porque responde al gesto y
+              // no sólo a la posición. Crece desde el borde macizo, así que
+              // estirar de más no abre un hueco contra la sección.
+              const objSy = 1 + tope(velSuave * 0.005, 0.22);
+              c.sy += (objSy - c.sy) * SUAVE;
+              if (Math.abs(objSy - c.sy) > 0.001) sigue = true;
+              c.el.style.setProperty("--wsy", c.sy.toFixed(4));
+            }
+          }
+
+          if (sigue) requestAnimationFrame(frame);
+          else corriendo = false;
+        };
+
+        const arrancar = () => {
+          if (corriendo) return;
+          corriendo = true;
+          requestAnimationFrame(frame);
+        };
+
+        medir();
+        arrancar();
+        window.addEventListener("scroll", arrancar, { passive: true });
+        window.addEventListener("resize", () => { medir(); arrancar(); }, { passive: true });
+        // Las imágenes cargan tarde y corren el layout: se vuelve a medir.
+        window.addEventListener("load", () => { medir(); arrancar(); });
+
+        /* Las imágenes lazy siguen cargando después del `load` y mueven todo:
+           si no se vuelve a medir, los efectos quedan desfasados respecto de
+           dónde está realmente cada elemento. */
+        let reMedir: number | undefined;
+        new ResizeObserver(() => {
+          clearTimeout(reMedir);
+          reMedir = window.setTimeout(() => { medir(); arrancar(); }, 120);
+        }).observe(document.body);
+        // Con la pestaña en segundo plano el navegador congela los frames:
+        // al volver hay que reanudar, o queda todo sin revelar.
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden) arrancar();
+        });
+      }
+
+      scrollFX();
+    </script>
+  </body>
+</html>

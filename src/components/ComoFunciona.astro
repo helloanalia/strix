@@ -1,0 +1,375 @@
+---
+import { ruta } from "../lib/ruta";
+import { pasos } from "../data/pasos";
+
+// Círculos concéntricos del Figma: 514 / 690 / 908 / 1164 px, borde #DEE9F3.
+const circulos = [514, 690, 908, 1164];
+
+// El centro cambia según el paso que se esté señalando: la tarjeta en el
+// estado que describe cada texto, el premio para el 03 y el panel para el 04.
+type Centro =
+  | { sellos: number; pie: "escanear" | "completa" }
+  | { qr: true }
+  | { premios: string[] }
+  | { panel: true };
+
+const centros: Centro[] = [
+  { sellos: 0, pie: "escanear" },   // 01 — la tarjeta recién armada
+  { qr: true },                     // 02 — el QR de la factura, solo
+  { premios: ["🍔", "☕", "🍦"] },    // 03 — lo que se lleva
+  { panel: true },                  // 04 — el dashboard
+];
+// (pasos.ts trae además un `icono` por paso: lo usa el layout de tarjetas,
+//  este diagrama no lo necesita.)
+
+/* ---------------------------------------------------------------------------
+   QR del paso 02.
+
+   OJO: es DECORATIVO. No codifica nada: es el dibujo de la factura dentro de
+   una ilustración, no un QR que se pueda escanear. Se genera acá y no se trae
+   como imagen para que quede nítido en cualquier tamaño y no sume un archivo.
+
+   Lo que lo hace leer como QR son los tres ojos de posicionamiento en las
+   esquinas; el resto es ruido con semilla fija, así que el dibujo es siempre
+   el mismo build tras build.
+--------------------------------------------------------------------------- */
+const QR_N = 25;
+
+// (fx, fy) es la esquina del ojo, que mide 7x7 y lleva un anillo de separación
+// en blanco alrededor. Devuelve null cuando el módulo cae fuera de su zona.
+const ojo = (fx: number, fy: number, x: number, y: number) => {
+  const dx = x - fx, dy = y - fy;
+  if (dx < -1 || dy < -1 || dx > 7 || dy > 7) return null;
+  if (dx < 0 || dy < 0 || dx > 6 || dy > 6) return false;   // la separación
+  const borde = dx === 0 || dy === 0 || dx === 6 || dy === 6;
+  const centro = dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4;
+  return borde || centro;
+};
+
+let semilla = 20260920;
+const azar = () => (semilla = (semilla * 1103515245 + 12345) % 2147483648) / 2147483648;
+
+let qrPath = "";
+for (let y = 0; y < QR_N; y++) {
+  for (let x = 0; x < QR_N; x++) {
+    const enOjo =
+      ojo(0, 0, x, y) ?? ojo(QR_N - 7, 0, x, y) ?? ojo(0, QR_N - 7, x, y);
+    const lleno = enOjo ?? azar() > 0.55;
+    if (lleno) qrPath += `M${x} ${y}h1v1h-1z`;
+  }
+}
+---
+
+<section class="como" id="como-funciona">
+  <!-- La zona clara no termina recta: el Figma la cierra con una elipse. -->
+  <div class="como-fondo" aria-hidden="true"></div>
+  <div class="como-remate" aria-hidden="true">
+    <img src={ruta("/decor/wave-bottom-light.svg")} alt="" />
+  </div>
+
+  <div class="container">
+    <header class="como-head" data-reveal="up-md">
+      <h2 class="section-title">
+        <span class="line">Configurás una vez</span>
+        <span class="line accent">Funciona solo</span>
+      </h2>
+      <p class="lead">
+        No hay hardware que instalar ni caja que integrar. El cliente paga, escanea el QR de su
+        factura y el sello queda registrado. Vos ves todo desde el panel.
+      </p>
+    </header>
+
+    <!-- `data-activo` es qué paso está mostrando el centro. Arranca en el 01 y
+         lo mueve el script de abajo; sin JS queda el 01 fijo. -->
+    <div class="diagrama" data-activo="1">
+      <div class="anillos" aria-hidden="true" data-reveal="fade">
+        {circulos.map((d) => <span class="anillo" style={`--d:${d}px`} />)}
+      </div>
+
+      <!-- Centro: cambia al señalar cada paso -->
+      <div class="centro" aria-hidden="true" data-reveal="fade" data-parallax="0.05">
+        {
+          centros.map((c, i) =>
+            "panel" in c ? (
+              <div class={`centro-item c${i + 1} panel`}>
+                <img src={ruta("/img/panel.webp")} width="2400" height="1275" alt="" loading="lazy" />
+              </div>
+            ) : "qr" in c ? (
+              /* El 02 no muestra la tarjeta: muestra el QR que se escanea. */
+              <div class={`centro-item c${i + 1} qr-solo`}>
+                <svg viewBox={`0 0 ${QR_N} ${QR_N}`} xmlns="http://www.w3.org/2000/svg">
+                  <path d={qrPath} fill="#111634" shape-rendering="crispEdges" />
+                </svg>
+              </div>
+            ) : "premios" in c ? (
+              /* El 03 tampoco: muestra lo que el cliente se lleva. */
+              <div class={`centro-item c${i + 1} premios`}>
+                {c.premios.map((e) => <span class="premio">{e}</span>)}
+              </div>
+            ) : (
+              <div class={`centro-item c${i + 1} tarjeta`}>
+                <div class="tarjeta-sellos">
+                  {[1, 2, 3, 4, 5].map((n) =>
+                    n <= c.sellos ? (
+                      <span class="sello sello-hecho">
+                        <img src={ruta("/img/pelota.webp")} alt="" width="98" height="98" />
+                      </span>
+                    ) : (
+                      <span class="sello">{n}</span>
+                    ),
+                  )}
+                </div>
+                <div class="tarjeta-pie">
+                  <div class="tarjeta-premio"><span>PREMIO</span><strong>2 horas</strong></div>
+                  {c.pie === "completa" ? (
+                    <span class="tarjeta-completa">Tarjeta completada</span>
+                  ) : (
+                    <span class="tarjeta-cta">Escanear factura</span>
+                  )}
+                </div>
+              </div>
+            ),
+          )
+        }
+      </div>
+
+      <ol class="pasos">
+        {
+          pasos.map((p, i) => (
+            <li class={`paso paso-${i + 1}`} data-reveal="up" style={`--rv-delay:${i * 0.15}s`}>
+              <span class="paso-num">{p.numero}</span>
+              <h3 class="paso-titulo">{p.titulo}</h3>
+              <p class="paso-texto">{p.texto}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .como {
+    position: relative;
+    background: transparent;
+    /* Sin margen con los celulares del hero: arranca pegada. */
+    padding-block: 0 calc(var(--escena) * 0.1114);
+  }
+  .como > .container { position: relative; z-index: 1; }
+
+  /* z-index negativo: la sombra de los celulares del hero asoma por debajo de
+     su sección, y sin esto este fondo opaco la corta con una línea recta. */
+  .como-fondo {
+    position: absolute;
+    z-index: -1;
+    left: 0; right: 0; top: 0;
+    height: calc(100% - var(--escena) * 0.5625);   /* 720/1280 */
+    background: var(--page);
+  }
+  .como-remate {
+    position: absolute;
+    z-index: -1;
+    left: 0; right: 0; bottom: 0;
+    height: calc(var(--escena) * 0.5625);
+  }
+  .como-remate img { width: 100%; height: 100%; }
+
+  .como-head { max-width: 780px; display: grid; gap: 20px; }
+
+  /* ---------------- diagrama ---------------- */
+  .diagrama { position: relative; height: 1164px; margin-top: 48px; }
+
+  .anillos { position: absolute; inset: 0; pointer-events: none; }
+  .anillo {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: var(--d); height: var(--d);
+    margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+    border: 4px solid #dee9f3;
+    border-radius: 50%;
+  }
+  .anillo:nth-child(3) { opacity: .6; }
+  .anillo:nth-child(4) { opacity: .2; }
+
+  /* ---------------- centro ---------------- */
+  .centro {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 400px;
+    height: 300px;
+    /* La posición va en `transform` para dejar `translate` libre al parallax. */
+    transform: translate(-50%, -50%) rotate(-8deg);
+    translate: 0 var(--py, 0);
+  }
+
+  .centro-item {
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    translate: 0 -50%;
+    border-radius: var(--r-3xl);
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgb(40 46 120 / .28);
+    opacity: 0;
+    scale: .96;
+    transition: opacity .4s var(--ease-rv), scale .4s var(--ease-rv);
+  }
+  .tarjeta { background: #6366f1; }
+  .panel { background: #fff; }
+  .panel img { width: 100%; height: auto; }
+
+  /* Se ve la del paso señalado, y se queda ahí hasta que se señale otro. */
+  .diagrama[data-activo="1"] .c1,
+  .diagrama[data-activo="2"] .c2,
+  .diagrama[data-activo="3"] .c3,
+  .diagrama[data-activo="4"] .c4 {
+    opacity: 1;
+    scale: 1;
+  }
+  .tarjeta-sellos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 10px;
+    padding: 26px 26px 20px;
+  }
+  .sello {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    width: 78px;
+    border: 2px dashed rgb(255 255 255 / .55);
+    border-radius: 50%;
+    color: rgb(255 255 255 / .85);
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .sello-hecho { border-style: solid; border-color: #93c5fd; padding: 5px; }
+  .sello-hecho img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+  /* --- 02: el QR de la factura --- */
+  /* Sin tarjeta: el QR solo, como el papel que el cliente pone bajo la cámara.
+     `left/right/translate` se reescriben porque .centro-item viene estirado de
+     lado a lado y el QR es cuadrado. */
+  .qr-solo {
+    left: 50%;
+    right: auto;
+    width: 232px;
+    translate: -50% -50%;
+    padding: 18px;
+    background: #fff;
+    rotate: 4deg;
+  }
+  .qr-solo svg { display: block; width: 100%; height: auto; }
+
+  /* --- 03: el premio --- */
+  /* Tampoco hay tarjeta: los emojis solos, en triángulo y encimados, que es
+     lo que el cliente se lleva. */
+  .premios {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+    align-content: center;
+    column-gap: 0;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .premio {
+    font-size: 116px;
+    line-height: 1;
+    filter: drop-shadow(0 16px 22px rgb(40 46 120 / .32));
+  }
+  /* El primero corona el triángulo; el margen negativo mete a los de abajo
+     dentro del hueco que deja el glifo del emoji, que trae mucho aire. */
+  .premio:nth-child(1) { grid-column: 1 / -1; justify-self: center; margin-bottom: -26px; rotate: -6deg; }
+  .premio:nth-child(2) { margin-right: -14px; rotate: -13deg; }
+  .premio:nth-child(3) { margin-left: -14px; rotate: 11deg; }
+
+  .tarjeta-pie {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px 20px;
+    background: #8f92f5;
+  }
+  .tarjeta-premio { display: grid; color: #fff; line-height: 1.25; }
+  .tarjeta-premio span { font-size: 12px; opacity: .75; }
+  .tarjeta-premio strong { font-size: 16px; font-weight: 700; }
+  .tarjeta-cta,
+  .tarjeta-completa {
+    padding: 10px 18px;
+    border-radius: var(--r-xl);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .tarjeta-cta { background: var(--indigo); color: #fff; }
+  .tarjeta-completa { background: #dcfce7; color: #166534; font-weight: 600; }
+
+  /* ---------------- pasos ---------------- */
+  .pasos { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; }
+  .paso {
+    position: absolute;
+    width: 345px;
+    display: grid;
+    gap: 4px;
+    transition: opacity .3s var(--ease-rv);
+  }
+  /* Al señalar uno, los otros se apagan un poco. */
+  .diagrama:has(.paso:hover) .paso:not(:hover) { opacity: .45; }
+  .paso-num {
+    font-size: 60px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.3px;
+    color: var(--dark);
+    transition: color .3s var(--ease-rv);
+  }
+  /* Al señalar un paso, su número se prende. */
+  .paso:hover .paso-num { color: var(--indigo); }
+  .paso-titulo { margin: 4px 0 0; font-size: 24px; font-weight: 600; line-height: 1.25; color: var(--fg); }
+  .paso-texto { margin: 0; font-size: 18px; line-height: 1.45; color: var(--muted); }
+
+  /* Posiciones del Figma, relativas al centro del diagrama. */
+  .paso-1 { left: calc(50% - 155px); top: calc(50% - 429px); }
+  .paso-2 { left: calc(50% - 580px); top: calc(50% - 59px); }
+  .paso-3 { left: calc(50% + 260px); top: calc(50% - 59px); }
+  .paso-4 { left: calc(50% - 180px); top: calc(50% + 266px); }
+
+  /* ======================= responsive ======================= */
+
+  @media (max-width: 1180px) {
+    .como { padding-bottom: calc(var(--escena) * 0.09); }
+    .diagrama { height: auto; padding-block: 24px 0; }
+    .anillos, .centro { display: none; }
+    .pasos {
+      position: static;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 48px 40px;
+    }
+    .paso { position: static; width: auto; }
+  }
+
+  @media (max-width: 720px) {
+    .como { padding-top: 0; }
+    .pasos { grid-template-columns: 1fr; gap: 36px; }
+    .paso-num { font-size: 48px; }
+    .paso-texto { font-size: 16px; }
+  }
+</style>
+
+<script>
+  /* El centro se queda con lo último que se señaló.
+     Esto no se puede hacer con `:hover`: apenas sacás el mouse el selector
+     deja de matchear y la imagen que acabás de mirar se va sola. Guardar cuál
+     está activa en un atributo la deja puesta hasta el próximo hover. */
+  document.querySelectorAll<HTMLElement>(".diagrama").forEach((diagrama) => {
+    diagrama.querySelectorAll<HTMLElement>(".paso").forEach((paso, i) => {
+      paso.addEventListener("mouseenter", () => {
+        diagrama.dataset.activo = String(i + 1);
+      });
+    });
+  });
+</script>

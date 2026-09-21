@@ -1,0 +1,281 @@
+/* ==========================================================================
+   strix — tokens y base
+   Valores extraídos del Figma "Strix web" (RR9ErdhINK3OIT6GdjAi6a).
+   ========================================================================== */
+
+:root {
+  /* Marca */
+  --indigo: #5471ff;
+  --indigo-hover: #455cff;
+  --indigo-light: #c0d5ff;
+  --deep: #16076a;          /* base del hero */
+  --navy: #1a0d72;          /* base del banner y de las tarjetas de pasos */
+  --dark: #1e2126;
+  --green: #91d229;         /* sello "un fan - un cliente" */
+
+  /* Glows (de los SVG decorativos del Figma) */
+  --glow-indigo: #5471ff;
+  --glow-violet: #7d59ff;
+  --glow-teal: #54ffe0;
+
+  /* Texto */
+  --fg: #1f2937;
+  --muted: #6b7280;
+  --muted-2: #9ca3af;
+
+  /* Superficies */
+  --page: #fafbfc;
+  --surface: #f3f4f6;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --neutral: #dcdcdc;
+
+  /* Acentos de rubro */
+  --orange-600: #ea580c; --orange-100: #ffedd5;
+  --pink-600:   #db2777; --pink-100:   #fce7f3;
+  --yellow-600: #cc9900; --yellow-100: #fff5d6;
+  --green-600:  #16a34a; --green-100:  #dcfce7;
+  --red-600:    #dc2626; --red-100:    #fee2e2;
+  --violet-600: #7c3aed; --violet-100: #ede9fe;
+
+  /* Radios */
+  --r-lg: 8px;
+  --r-xl: 12px;
+  --r-3xl: 24px;
+  --r-full: 999px;
+
+  /* El CONTENIDO mide 1366px como máximo; los fondos, ondas y glows van a
+     pantalla completa. En el Figma (1440px) el contenido era de 1280px, así que
+     las medidas proporcionales del hero se calculan sobre --escena. */
+  /* En el Figma cada bloque tenía su propio ancho dentro del frame de 1440
+     (secciones 1280, header 1101, titular del hero 1186), pero acá TODO el
+     contenido va al mismo ancho: si no, el header entra 96px por lado
+     respecto de las secciones y se nota como un escalón. */
+  --container: 1366px;
+  --gutter: 24px;
+
+  /* Movimiento — valores del timeline del Figma */
+  --ease-rv: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Ancho del contenido, expresado en vw para poder usarlo dentro de calc().
+     Las composiciones del Figma se escalan contra esto. */
+  --escena: min(1366px, calc(100vw - var(--gutter) * 2));
+
+  /* Tipografías */
+  --font-body: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-ui: "Inter", system-ui, -apple-system, sans-serif;
+  --font-alt: "Montserrat", system-ui, sans-serif;
+  /* Display: en el Figma es Cocogoose Pro (licencia paga).
+     Poppins es el reemplazo libre más cercano — misma familia geométrica. */
+  --font-display: "Poppins", var(--font-body);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: clip;
+  /* Permite animar alturas hacia `auto` (el desplegable de las preguntas).
+     Donde no está soportado, el desplegable abre sin animación. */
+  interpolate-size: allow-keywords;
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--card);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; letter-spacing: inherit; }
+
+/* --------------------------------------------------------------------------
+   Utilidades compartidas
+   -------------------------------------------------------------------------- */
+
+.container {
+  width: min(var(--container), 100% - var(--gutter) * 2);
+  margin-inline: auto;
+}
+
+/* Titular de sección: 48px / tracking 0.24px en el Figma */
+.section-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: clamp(30px, 4.2vw, 48px);
+  line-height: 1.22;
+  letter-spacing: 0.24px;
+  color: var(--fg);
+}
+.section-title .accent { color: var(--indigo); }
+
+/* Cada línea de un titular es un salto explícito, como en el Figma. */
+.line { display: block; }
+
+
+/* Titular display (el que en el Figma es Cocogoose) */
+.display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.lead {
+  margin: 0;
+  font-size: clamp(16px, 1.4vw, 18px);
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* Botones — radio 8px y padding 16/12, como el header del Figma */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--r-lg);
+  border: 1px solid transparent;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.07px;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.btn-ghost-light { border-color: #fff; color: #fff; background: transparent; }
+.btn-ghost-light:hover { background: rgb(255 255 255 / .12); }
+.btn-white { background: #fff; border-color: var(--border); color: var(--indigo); }
+.btn-white:hover { background: #f4f6ff; }
+.btn-primary { background: var(--indigo); color: #fff; }
+.btn-primary:hover { background: var(--indigo-hover); }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
+
+@media (max-width: 640px) { :root { --gutter: 16px; } }
+
+
+/* ==========================================================================
+   Entradas al hacer scroll
+   Curvas, distancias y duraciones tomadas del timeline del Figma
+   (easing cubic-bezier(.22,1,.36,1); y: 30-100px; x: ±60px; scale: .88-.95).
+   ========================================================================== */
+
+[data-reveal] { opacity: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    translate: var(--rv-x, 0) var(--rv-y, 0);
+    scale: var(--rv-s, 1);
+    transition:
+      opacity var(--rv-dur, .7s) var(--ease-rv) var(--rv-delay, 0s),
+      translate var(--rv-dur, .7s) var(--ease-rv) var(--rv-delay, 0s),
+      scale var(--rv-dur, .7s) var(--ease-rv) var(--rv-delay, 0s);
+    will-change: opacity, translate, scale;
+  }
+
+  [data-reveal="up-sm"]  { --rv-y: 30px; --rv-dur: .5s; }
+  [data-reveal="up"]     { --rv-y: 40px; --rv-dur: .55s; }
+  [data-reveal="up-md"]  { --rv-y: 50px; --rv-dur: .7s; }
+  [data-reveal="up-lg"]  { --rv-y: 80px; --rv-dur: .8s; }
+  [data-reveal="up-xl"]  { --rv-y: 100px; --rv-dur: 1s; }
+  [data-reveal="left"]   { --rv-x: -60px; --rv-dur: .6s; }
+  [data-reveal="right"]  { --rv-x: 60px;  --rv-dur: .6s; }
+  [data-reveal="scale"]  { --rv-s: .95;   --rv-dur: .8s; }
+  [data-reveal="scale-lg"] { --rv-s: .88; --rv-dur: 1s; }
+  [data-reveal="fade"]   { --rv-dur: 1s; }
+
+  [data-reveal].is-in {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    will-change: auto;
+  }
+}
+
+
+/* ==========================================================================
+   Ondas
+   El SVG va más ancho que su marco y se desplaza en horizontal con el scroll:
+   así la onda "corre" sin que nunca asome un borde ni se abra un hueco.
+   El color de fondo del marco es el de la sección que queda ARRIBA de la onda.
+   ========================================================================== */
+
+.onda { position: relative; overflow: hidden; }
+.onda > img {
+  display: block;
+  /* El sobrante a cada lado es el presupuesto de corrimiento: 22% del marco.
+     Lo gastan el scroll y el vaivén propio, los dos medidos en % del ANCHO DE
+     LA IMAGEN, que es 1.44 veces el marco.
+
+     OJO con el tope del scroll: hay que presupuestar el `data-wave` ENTERO
+     (12), no lo que la onda recorre mientras se la ve. El motor sigue moviendo
+     --wx con la onda fuera de pantalla y persigue al objetivo con retardo, así
+     que puede volver a entrar con el valor cerca del tope.
+       scroll: 12% × 1.44 = 17.3%
+       vaivén:  2.4% × 1.44 = 3.5%
+     Total 20.8% contra 22% disponibles. Si se sube alguno de los dos, hay que
+     subir esto también o asoma el borde del dibujo. */
+  width: 144%;
+  height: 100%;
+  margin-left: -22%;
+  max-width: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .onda > img {
+    /* --wx: corrimiento lateral, que persigue al objetivo con retardo.
+       --wsy: estiramiento vertical según la velocidad del scroll.
+       El origen va en el borde macizo de la onda (abajo en las superiores,
+       arriba en las inferiores) para que al estirarse no se despegue de la
+       sección y no aparezca un hueco. */
+    translate: var(--wx, 0) 0;
+    transform: scaleY(var(--wsy, 1));
+    transform-origin: bottom;
+
+    /* Además del scroll, la onda se mueve sola: quieta se ve como un recorte
+       de papel. La animación NO pisa lo del scroll — vuelve a leer --wx y
+       --wsy en cada frame y le suma su propio vaivén encima. */
+    animation: onda-viva var(--onda-dur, 16s) ease-in-out var(--onda-fase, 0s) infinite;
+  }
+  .onda-bottom > img { transform-origin: top; }
+
+  /* El corrimiento propio llega a 2.4%, y el del scroll a 7%: entre los dos
+     no pasan del 12% que el SVG tiene de sobra a cada lado (mide 124% y
+     arranca corrido -12%). Si se pasaran, asomaría el borde del dibujo.
+     El estiramiento sale del borde macizo, así que nunca abre un hueco. */
+  @keyframes onda-viva {
+    0%, 100% {
+      translate: calc(var(--wx, 0%) - 2.4%) 0;
+      transform: scaleY(calc(var(--wsy, 1) * 0.985));
+    }
+    50% {
+      translate: calc(var(--wx, 0%) + 2.4%) 0;
+      transform: scaleY(calc(var(--wsy, 1) * 1.025));
+    }
+  }
+}

@@ -1,0 +1,129 @@
+---
+import { preguntas } from "../data/preguntas";
+---
+
+<section class="faq" id="faq">
+  <div class="container">
+    <header class="faq-head">
+      <h2 class="section-title titulo-claro">
+        <span class="line">Preguntas</span>
+        <span class="line accent">frecuentes</span>
+      </h2>
+      <p class="lead lead-claro">Lo que nos suelen preguntar.</p>
+    </header>
+
+    <div class="lista" data-reveal="up-md">
+      {
+        preguntas.map((p) => (
+          <details class="fila">
+            <summary>
+              <span class="fila-pregunta">{p.pregunta}</span>
+              <span class="fila-boton" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </span>
+            </summary>
+            <div class="fila-cuerpo">
+              <p>{p.respuesta}</p>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq { background: var(--dark); padding-block: 104px 112px; }
+  .faq-head { display: grid; gap: 16px; }
+  .titulo-claro { color: #fff; }
+  .lead-claro { color: rgb(255 255 255 / .62); }
+
+  .lista { margin-top: 48px; border-top: 1px solid rgb(255 255 255 / .14); }
+
+  .fila { border-bottom: 1px solid rgb(255 255 255 / .14); }
+
+  .fila summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 28px 24px;
+    cursor: pointer;
+    list-style: none;
+    transition: background-color .3s var(--ease-rv), color .3s var(--ease-rv);
+  }
+  .fila summary::-webkit-details-marker { display: none; }
+
+  .fila-pregunta {
+    font-size: clamp(20px, 2.1vw, 28px);
+    font-weight: 700;
+    line-height: 1.25;
+    color: #fff;
+    transition: color .3s var(--ease-rv);
+  }
+
+  .fila-boton {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 48px; height: 48px;
+    border: 1px solid rgb(255 255 255 / .28);
+    border-radius: var(--r-xl);
+    color: #fff;
+    transition: background-color .3s var(--ease-rv), border-color .3s var(--ease-rv),
+      color .3s var(--ease-rv), rotate .3s var(--ease-rv);
+  }
+  .fila-boton svg { width: 20px; height: 20px; }
+
+  /* Hover: la fila se invierte, como en la referencia. */
+  .fila summary:hover { background: var(--page); }
+  .fila summary:hover .fila-pregunta { color: var(--indigo); }
+  .fila summary:hover .fila-boton {
+    background: var(--indigo);
+    border-color: var(--indigo);
+    color: #fff;
+  }
+
+  .fila[open] summary { background: var(--page); }
+  .fila[open] .fila-pregunta { color: var(--indigo); }
+  .fila[open] .fila-boton {
+    background: var(--indigo);
+    border-color: var(--indigo);
+    rotate: 45deg;   /* el "+" pasa a ser una cruz */
+  }
+
+  .fila-cuerpo { padding: 0 24px 30px; background: var(--page); }
+  .fila-cuerpo p {
+    max-width: 68ch;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  /* Despliegue animado donde el navegador lo soporta; donde no, abre directo. */
+  @supports (interpolate-size: allow-keywords) {
+    @media (prefers-reduced-motion: no-preference) {
+      .fila::details-content {
+        block-size: 0;
+        overflow: hidden;
+        transition: block-size .4s var(--ease-rv), content-visibility .4s allow-discrete;
+      }
+      .fila[open]::details-content { block-size: auto; }
+    }
+  }
+
+  :where(.fila summary):focus-visible { outline: 2px solid var(--indigo); outline-offset: -2px; }
+
+  @media (max-width: 720px) {
+    .faq { padding-block: 64px 72px; }
+    .lista { margin-top: 32px; }
+    .fila summary { padding: 22px 16px; gap: 20px; }
+    .fila-boton { width: 40px; height: 40px; }
+    .fila-cuerpo { padding: 0 16px 24px; }
+    .fila-cuerpo p { font-size: 16px; }
+  }
+</style>

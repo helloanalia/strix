@@ -1,0 +1,87 @@
+---
+import { ruta } from "../lib/ruta";
+const features = [
+  {
+    titulo: "Sellos por QR de factura",
+    texto: "El cliente escanea el QR de su ticket y el sello queda registrado.",
+  },
+  {
+    titulo: "Multiplicadores de sellos",
+    texto: "¿El miércoles flojo? Activás sellos dobles para ese día y listo.",
+  },
+  {
+    titulo: "Canjes que no se falsifican",
+    texto:
+      "Cada premio genera un QR de uso único. Tu equipo lo verifica desde el panel en segundos y queda registrado.",
+  },
+  {
+    titulo: "Tus 10 mejores clientes",
+    texto:
+      "Sabés quiénes son. Podés mandarles un regalo directo, pasarlos a VIP o pedirles feedback privado.",
+  },
+  {
+    titulo: "Panel de actividad",
+    texto:
+      "Frecuencia de visita, ticket promedio, horarios pico, clientes que no volvieron. No son métricas de vanidad, son datos para tomar decisiones esta semana.",
+  },
+];
+---
+
+<section class="herramientas" id="herramientas">
+  <div class="container">
+    <h2 class="section-title" data-reveal="up-md">
+      <span class="line">Las herramientas para</span>
+      <span class="line">que <span class="accent">vuelvan siempre</span></span>
+    </h2>
+
+    <ul class="features">
+      {
+        features.map((f, i) => (
+          <li class="feature" data-reveal="up-sm" style={`--rv-delay:${i * 0.12}s`}>
+            <h3 class="feature-titulo">{f.titulo}</h3>
+            <p class="feature-texto">{f.texto}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="container panel-wrap">
+    <img class="panel" data-reveal="scale" src={ruta("/img/panel.webp")} width="2400" height="1275"
+      alt="Panel de strix: resumen con días promedio para volver, ticket promedio, demanda por día y hora, y tarjetas reclamadas" />
+  </div>
+</section>
+
+<style>
+  .herramientas { position: relative; background: #fff; padding-top: 128px; }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 44px 64px;
+    margin: 56px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .feature { display: grid; gap: 6px; align-content: start; }
+  .feature-titulo { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.35; color: var(--fg); }
+  .feature-texto { margin: 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
+
+  .panel-wrap { margin-top: 96px; }
+  .panel {
+    width: 100%;
+    height: auto;
+    border-radius: var(--r-3xl);
+    box-shadow: 0 24px 64px rgb(31 41 55 / .14);
+  }
+
+  @media (max-width: 1000px) {
+    .features { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px 40px; }
+  }
+  @media (max-width: 640px) {
+    .herramientas { padding-top: 88px; }
+    .features { grid-template-columns: 1fr; gap: 28px; margin-top: 40px; }
+    .panel-wrap { margin-top: 64px; }
+    .panel { border-radius: var(--r-xl); }
+  }
+</style>
