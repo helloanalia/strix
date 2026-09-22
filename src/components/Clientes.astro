@@ -7,12 +7,16 @@ import StickerPeel from "./StickerPeel.astro";
 /* El nombre no siempre es lo que dice el logo: Capriccio es "Capriccio
    Helados", y de Café Suárez sólo va el nombre, sin el resto de la leyenda que
    trae la imagen. Es el texto que aparece al pasar por encima y también el alt
-   de cada logo, así que los dos dicen lo mismo. */
+   de cada logo, así que los dos dicen lo mismo.
+
+   `rubro` es la segunda línea del tooltip. Está deducido del propio nombre de
+   cada marca, no es información que me hayan dado: conviene confirmarlo con
+   cada cliente antes de dejarlo así en un sitio público. */
 const logos = [
-  { src: ruta("/img/clientes/esquina-cantina.webp"), nombre: "Esquina Cantina",   clase: "l1", desde: "left" },
-  { src: ruta("/img/clientes/capriccio.webp"),       nombre: "Capriccio Helados", clase: "l2", desde: "right" },
-  { src: ruta("/img/clientes/cliente-3.webp"),       nombre: "Club Café",         clase: "l3", desde: "left" },
-  { src: ruta("/img/clientes/cafe-suarez.webp"),     nombre: "Café Suárez",       clase: "l4", desde: "right" },
+  { src: ruta("/img/clientes/esquina-cantina.webp"), nombre: "Esquina Cantina",   rubro: "Cantina",    clase: "l1", desde: "left" },
+  { src: ruta("/img/clientes/capriccio.webp"),       nombre: "Capriccio Helados", rubro: "Heladería",  clase: "l2", desde: "right" },
+  { src: ruta("/img/clientes/cliente-3.webp"),       nombre: "Club Café",         rubro: "Cafetería",  clase: "l3", desde: "left" },
+  { src: ruta("/img/clientes/cafe-suarez.webp"),     nombre: "Café Suárez",       rubro: "Cafetería",  clase: "l4", desde: "right" },
 ];
 ---
 
@@ -37,9 +41,12 @@ const logos = [
             data-reveal={l.desde}
             style={`--rv-delay:${i * 0.12}s`}
           >
-            <img src={l.src} alt={l.nombre} loading="lazy" />
+            <img src={l.src} alt={`${l.nombre} — ${l.rubro}`} loading="lazy" />
             {/* Duplica al alt, así que para un lector de pantalla se oculta. */}
-            <span class="logo-nombre" aria-hidden="true">{l.nombre}</span>
+            <span class="logo-tip" aria-hidden="true">
+              <span class="logo-tip-nombre">{l.nombre}</span>
+              <span class="logo-tip-rubro">{l.rubro}</span>
+            </span>
           </span>
         ))
       }
@@ -76,26 +83,86 @@ const logos = [
       box-shadow .35s var(--ease-rv);
   }
 
-  /* El nombre: abajo del logo, y no se muestra hasta que se lo señala. */
-  .logo-nombre {
+  /* --- tooltip ---
+     Mismo diseño y misma animación que el componente de referencia, hecho con
+     las herramientas que ya usa el sitio.
+
+     Va todo en las propiedades sueltas `translate` / `rotate` / `scale` y no en
+     `transform`: así el centrado, la entrada y el seguimiento del puntero se
+     componen sin pisarse, que es lo que en el original resuelven tres motion
+     values distintos. */
+  .logo-tip {
     position: absolute;
     left: 50%;
-    top: 100%;
-    translate: -50% 4px;
-    padding: 6px 12px;
-    border-radius: var(--r-full);
+    bottom: calc(100% + 14px);
+    z-index: 50;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: var(--r-md, 8px);
     background: var(--dark);
-    color: #fff;
+    box-shadow: 0 20px 25px -5px rgb(15 18 30 / .3), 0 8px 10px -6px rgb(15 18 30 / .3);
     font-family: var(--font-ui);
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1.2;
+    line-height: 1.25;
     white-space: nowrap;
-    opacity: 0;
     pointer-events: none;
-    transition: opacity .25s var(--ease-rv), translate .25s var(--ease-rv);
+
+    /* Estado cerrado: abajo, chico y transparente. */
+    translate: calc(-50% + var(--tip-x, 0px)) 20px;
+    scale: .6;
+    rotate: var(--tip-giro, 0deg);
+    opacity: 0;
+
+    /* La entrada del original es un resorte (stiffness 260, damping 10): llega
+       de abajo y se pasa un poco de largo antes de asentarse. Esa curva es lo
+       más parecido en CSS. El seguimiento del puntero es más lento y más
+       blando, como el segundo resorte (stiffness 100, damping 5). */
+    transition:
+      opacity .18s ease-out,
+      scale .32s cubic-bezier(.34, 1.56, .64, 1),
+      translate .42s cubic-bezier(.22, 1.4, .36, 1),
+      rotate .42s cubic-bezier(.22, 1.4, .36, 1);
   }
-  .logo:hover .logo-nombre { opacity: 1; translate: -50% 10px; }
+  .logo:hover .logo-tip {
+    opacity: 1;
+    scale: 1;
+    translate: calc(-50% + var(--tip-x, 0px)) 0;
+  }
+
+  /* Los dos hilos de color del borde inferior, que es lo que le da el detalle:
+     uno corto y otro más largo, cada uno apagándose hacia las puntas. */
+  .logo-tip::before,
+  .logo-tip::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    height: 1px;
+  }
+  .logo-tip::before {
+    left: 40px;
+    width: 20%;
+    background: linear-gradient(to right, transparent, #10b981, transparent);
+  }
+  .logo-tip::after {
+    left: 40px;
+    width: 40%;
+    background: linear-gradient(to right, transparent, #0ea5e9, transparent);
+  }
+
+  .logo-tip-nombre {
+    position: relative;
+    z-index: 30;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--page);
+  }
+  .logo-tip-rubro {
+    font-size: 12px;
+    color: rgb(255 255 255 / .5);
+  }
 
   @media (prefers-reduced-motion: no-preference) {
     .logo:hover img {
@@ -148,3 +215,33 @@ const logos = [
     .logo { position: relative; width: 96px; }
   }
 </style>
+
+<script>
+  /* El tooltip sigue al puntero: se inclina y se corre según de qué lado del
+     logo esté el mouse. En el componente de referencia esto son dos motion
+     values de framer-motion; acá son dos variables CSS y la transición de
+     arriba hace de resorte.
+
+     El rango es el mismo del original: ±100px de distancia al centro se
+     mapean a ±45° de giro y ±50px de corrimiento. */
+  const TOPE = 100, GIRO = 45, CORRIMIENTO = 50;
+
+  document.querySelectorAll<HTMLElement>(".logo").forEach((logo) => {
+    const tip = logo.querySelector<HTMLElement>(".logo-tip");
+    if (!tip) return;
+
+    logo.addEventListener("mousemove", (e) => {
+      const caja = logo.getBoundingClientRect();
+      const desdeElCentro = e.clientX - caja.left - caja.width / 2;
+      const f = Math.max(-1, Math.min(1, desdeElCentro / TOPE));
+      tip.style.setProperty("--tip-giro", `${(f * GIRO).toFixed(2)}deg`);
+      tip.style.setProperty("--tip-x", `${(f * CORRIMIENTO).toFixed(2)}px`);
+    });
+
+    // Al salir vuelve a cero, así la próxima vez entra derecho.
+    logo.addEventListener("mouseleave", () => {
+      tip.style.setProperty("--tip-giro", "0deg");
+      tip.style.setProperty("--tip-x", "0px");
+    });
+  });
+</script>
