@@ -1,8 +1,9 @@
 ---
-// Mantenimiento programado — Figma 376:15733 (lleva el logo en vez de ícono).
-// Escenario: engranajes que se pueden acelerar a mano y una barra de progreso
-// que cuenta lo que estamos haciendo. Llega al 99% y ahí se queda pensando.
-import ErrorPage from "../components/ErrorPage.astro";
+// Mantenimiento programado — Figma Strix APP › System › Errores/06-mantenimiento.
+// Layout de login: engranajes en el panel índigo (tocarlos los acelera) y,
+// del lado claro, la lista de lo que estamos haciendo y una barra que llega
+// al 99% y ahí se queda.
+import LoginShell from "../components/errores/LoginShell.astro";
 import { ruta } from "../lib/ruta";
 
 // Engranaje de 10 dientes centrado en (50, 50), en un viewBox de 100×100.
@@ -18,169 +19,153 @@ const engranaje = (() => {
   }
   return d + "Z";
 })();
+
+const engranajes = [
+  { clase: "grande", color: "#ffffff" },
+  { clase: "chico", color: "#c0d5ff" },
+  { clase: "mini", color: "#16076a" },
+];
 ---
 
-<ErrorPage
-  titulo="Sistema en mantenimiento programado."
-  texto="Pusimos el panel en mantenimiento un ratito para mejorar cómo visualizás tus datos y el rendimiento de tus campañas. Volvemos enseguida con un sistema más potente para ayudarte a fidelizar."
-  icono="logo"
+<LoginShell
+  titulo="Mantenimiento programado"
+  descripcion="Pusimos el panel en mantenimiento un ratito. Volvemos enseguida."
+  bajada="Cerrado por mejoras. Volvemos enseguida."
 >
-  <div class="escenario taller" data-taller>
-    <button class="tl-motor" type="button" data-motor aria-label="Darle cuerda a los engranajes">
-      <svg class="tl-eng tl-grande" viewBox="0 0 100 100" aria-hidden="true">
-        <path d={engranaje} fill="#5471ff" /><circle cx="50" cy="50" r="15" fill="#1a0d72" />
+  <button slot="panel" class="motor" type="button" data-motor aria-label="Darle cuerda a los engranajes">
+    {engranajes.map((g) => (
+      <svg class={`eng ${g.clase}`} viewBox="0 0 100 100" aria-hidden="true">
+        <path d={engranaje} fill={g.color} /><circle cx="50" cy="50" r="15" fill="#5471ff" />
       </svg>
-      <svg class="tl-eng tl-chico" viewBox="0 0 100 100" aria-hidden="true">
-        <path d={engranaje} fill="#7d59ff" /><circle cx="50" cy="50" r="15" fill="#1a0d72" />
-      </svg>
-      <svg class="tl-eng tl-mini" viewBox="0 0 100 100" aria-hidden="true">
-        <path d={engranaje} fill="#c0d5ff" /><circle cx="50" cy="50" r="15" fill="#1a0d72" />
-      </svg>
-      <img class="tl-logo" src={ruta("/img/logo-strix.svg")} alt="" width="123" height="49" />
-    </button>
+    ))}
+    <svg class="llave" viewBox="0 0 24 24" width="72" height="72" fill="none" aria-hidden="true">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="#ffc728" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
 
-    <div class="tl-progreso" aria-hidden="true">
-      <div class="tl-barra"><span data-relleno></span></div>
-      <span class="tl-pct" data-pct>0%</span>
+  <span class="badge badge-yellow">Mantenimiento programado</span>
+  <h1 class="p-title">Estamos puliendo el panel.</h1>
+  <p class="p-text">Pusimos el panel en mantenimiento un ratito para mejorar cómo visualizás tus datos y el rendimiento de tus campañas. Volvemos enseguida con un sistema más potente para ayudarte a fidelizar.</p>
+
+  <div class="avance">
+    <p class="paso hecho"><span class="ic" aria-hidden="true"></span>Contamos los sellos uno por uno</p>
+    <p class="paso hecho"><span class="ic" aria-hidden="true"></span>Pulimos los gráficos hasta que brillen</p>
+    <p class="paso curso" aria-live="polite"><span class="ic" aria-hidden="true"></span><span data-paso>Le enseñamos estadísticas nuevas al búho</span></p>
+    <div class="progreso">
+      <div class="barra" role="progressbar" aria-label="Avance del mantenimiento" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-barra>
+        <span data-relleno></span>
+      </div>
+      <span class="pct" data-pct>0%</span>
     </div>
-
-    <p class="escenario-msg" data-msg aria-live="polite">Calentando motores...</p>
   </div>
-</ErrorPage>
+
+  <div class="p-acciones">
+    <a class="btn btn-solid-blue" href={ruta("/")}>Volver al inicio</a>
+    <p class="p-hint" data-pista>El último 1% siempre es el más largo.</p>
+  </div>
+</LoginShell>
 
 <style>
-  .taller {
-    background:
-      repeating-linear-gradient(-45deg, rgb(255 199 40 / .06) 0 22px, transparent 22px 44px),
-      var(--navy);
-  }
-
-  .tl-motor {
+  .motor {
     position: absolute;
-    left: 50%; top: 36%;
-    translate: -50% -50%;
-    width: clamp(220px, 40vw, 300px);
-    aspect-ratio: 1.5;
+    inset: 0;
     padding: 0;
     border: 0;
     background: none;
     cursor: pointer;
   }
-  .tl-eng { position: absolute; overflow: visible; }
-  .tl-grande { width: 46%; left: 6%; top: 8%; }
-  .tl-chico  { width: 32%; left: 46%; top: 0%; }
-  .tl-mini   { width: 22%; left: 70%; top: 44%; }
-  /* El giro lo lleva el script: con una animación CSS, cambiar la velocidad
-     a mitad de vuelta hace saltar el engranaje. */
+  .eng { position: absolute; }
+  .grande { width: 200px; left: 4%; top: 18%; }
+  .chico  { width: 140px; left: 48%; top: 6%; }
+  .mini   { width: 96px;  left: 56%; top: 52%; }
+  .llave { position: absolute; left: 2%; top: 72%; rotate: 15deg; }
 
-  .tl-logo {
-    position: absolute;
-    left: 50%; bottom: -6%;
-    width: 46%;
-    height: auto;
-    translate: -50% 0;
-    filter: drop-shadow(0 6px 14px rgb(6 2 40 / .6));
-    transition: scale .3s cubic-bezier(.34, 1.56, .64, 1);
+  .avance {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 12px;
+    background: rgb(238 241 255 / .5);
   }
-  .tl-motor:active .tl-logo { scale: .92; }
-
-  .tl-progreso {
-    position: absolute;
-    left: 50%; bottom: 62px;
-    translate: -50% 0;
-    width: min(420px, 100% - 48px);
+  .paso {
     display: flex;
     align-items: center;
     gap: 12px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
   }
-  .tl-barra {
-    flex: 1;
-    height: 10px;
-    border-radius: var(--r-full);
-    background: rgb(255 255 255 / .12);
-    overflow: hidden;
+  .hecho { color: var(--muted); }
+  .ic { flex: none; width: 20px; height: 20px; border-radius: 50%; }
+  .hecho .ic {
+    background: var(--green-600) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m6 10.5 2.5 2.5L14 7.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 100%;
   }
-  .tl-barra span {
-    display: block;
-    height: 100%;
-    width: 0%;
-    border-radius: inherit;
-    background:
-      repeating-linear-gradient(-45deg, rgb(255 255 255 / .25) 0 8px, transparent 8px 16px),
-      linear-gradient(90deg, var(--indigo), var(--glow-teal));
-    background-size: 22px 22px, 100% 100%;
-    transition: width .6s var(--ease-rv);
-  }
+  .curso .ic { border: 3px solid var(--light); border-top-color: var(--indigo); }
   @media (prefers-reduced-motion: no-preference) {
-    .tl-barra span { animation: tl-rayas .8s linear infinite; }
+    .curso .ic { animation: gira 1s linear infinite; }
   }
-  @keyframes tl-rayas { to { background-position: 22px 0, 0 0; } }
-  .tl-pct {
-    min-width: 3.2em;
-    font-family: var(--font-ui);
-    font-size: 13px;
-    font-weight: 600;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
+  @keyframes gira { to { rotate: 360deg; } }
+
+  .progreso { display: flex; align-items: center; gap: 12px; }
+  .barra { flex: 1; height: 8px; border-radius: var(--r-full); background: var(--neutral); overflow: hidden; }
+  .barra span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--indigo); transition: width .6s var(--ease-rv); }
+  .pct { min-width: 3em; font-size: 14px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+
+  @media (max-width: 900px) {
+    .grande { width: 150px; }
+    .chico { width: 104px; }
+    .mini { width: 72px; }
   }
 </style>
 
 <script>
-  const esc = document.querySelector<HTMLElement>("[data-taller]")!;
-  const motor = esc.querySelector<HTMLButtonElement>("[data-motor]")!;
-  const relleno = esc.querySelector<HTMLElement>("[data-relleno]")!;
-  const pct = esc.querySelector<HTMLElement>("[data-pct]")!;
-  const msg = esc.querySelector<HTMLElement>("[data-msg]")!;
+  const motor = document.querySelector<HTMLButtonElement>("[data-motor]")!;
+  const engs = [...motor.querySelectorAll<SVGElement>(".eng")];
+  const barra = document.querySelector<HTMLElement>("[data-barra]")!;
+  const relleno = document.querySelector<HTMLElement>("[data-relleno]")!;
+  const pct = document.querySelector<HTMLElement>("[data-pct]")!;
+  const paso = document.querySelector<HTMLElement>("[data-paso]")!;
 
-  const pasos = [
-    "Contando sellos uno por uno...",
-    "Puliendo los gráficos hasta que brillen...",
-    "Enseñándole estadísticas nuevas al búho...",
-    "Ordenando las campañas por color...",
-    "Ajustando tornillos del panel...",
-    "Probando que el botón de canjear siga canjeando...",
+  const tareas = [
+    "Le enseñamos estadísticas nuevas al búho",
+    "Ordenamos las campañas por color",
+    "Ajustamos los tornillos del panel",
+    "Probamos que el botón de canjear siga canjeando",
   ];
-
+  let t = 0;
   let p = 0;
-  let paso = 0;
   let vel = 1;
 
-  const pintar = () => {
+  // Avanza más lento a medida que se acerca al final, y nunca pasa de 99.
+  setInterval(() => {
+    p = Math.min(99, p + Math.max(0.4, (99 - p) * 0.06) * vel);
     relleno.style.width = `${p}%`;
     pct.textContent = `${Math.floor(p)}%`;
-  };
+    barra.setAttribute("aria-valuenow", String(Math.floor(p)));
+  }, 700);
+  setInterval(() => { paso.textContent = tareas[++t % tareas.length]; }, 4200);
 
-  // Avanza más lento a medida que se acerca al final, y nunca pasa de 99.
-  const tic = () => {
-    p = Math.min(99, p + Math.max(0.4, (99 - p) * 0.06) * vel);
-    pintar();
-    if (p >= 99) msg.textContent = "99%. El último 1% siempre es el más largo.";
-    else if (Math.random() < 0.18) msg.textContent = pasos[paso++ % pasos.length];
-  };
-  setInterval(tic, 700);
-
-  // Giro: los tres engranajes engranan, así que van en sentidos alternados y
-  // el más chico gira más rápido.
-  const engs = [...esc.querySelectorAll<SVGElement>(".tl-eng")];
+  // Los engranajes engranan: sentidos alternados y el más chico más rápido.
+  // El giro va por script porque cambiar la velocidad de una animación CSS a
+  // mitad de vuelta hace saltar el engranaje.
   const relacion = [1, -1.43, 2.1];
   let angulo = 0;
   let antes = performance.now();
-  const girar = (t: number) => {
-    angulo += ((t - antes) / 1000) * 40 * vel;
-    antes = t;
+  const girar = (ahora: number) => {
+    angulo += ((ahora - antes) / 1000) * 30 * vel;
+    antes = ahora;
     engs.forEach((e, i) => (e.style.rotate = `${angulo * relacion[i]}deg`));
     requestAnimationFrame(girar);
   };
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) requestAnimationFrame(girar);
 
-  // Tocar los engranajes los acelera un rato.
   let frena: number | undefined;
   motor.addEventListener("click", () => {
     vel = Math.min(vel + 1.5, 7);
-    msg.textContent = vel >= 7 ? "¡A toda máquina! Más rápido no da." : "Le diste cuerda. Gracias por la ayuda.";
     clearTimeout(frena);
-    frena = window.setTimeout(() => {
-      vel = 1;
-    }, 2500);
+    frena = window.setTimeout(() => (vel = 1), 2500);
   });
 </script>

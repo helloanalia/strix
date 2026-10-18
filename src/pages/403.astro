@@ -1,153 +1,179 @@
 ---
-// Error 403 — Figma 376:15764.
-// Escenario: un candado que se puede intentar abrir a los golpes. No abre.
-import ErrorPage from "../components/ErrorPage.astro";
+// Error 403 — Figma Strix APP › System › Errores/02-403.
+// Un pase con talón: el candado vive en el talón y el texto en el cuerpo.
+// Tocar el candado lo sacude y el sello "Sin acceso" vuelve a golpear.
+import PanelShell from "../components/errores/PanelShell.astro";
+import { ruta } from "../lib/ruta";
 ---
 
-<ErrorPage
-  titulo="Error 403 — Acceso denegado / Contenido restringido."
-  texto="Tu usuario no tiene los permisos necesarios para ver estas configuraciones o analíticas. Pedile al administrador de tu negocio que revise tus niveles de acceso."
-  icono="candado"
-  badge="Acceso denegado"
+<PanelShell
+  titulo="Error 403 — Acceso denegado"
+  descripcion="Tu usuario no tiene los permisos necesarios para ver estas configuraciones o analíticas."
 >
-  <div class="escenario candado" data-candado>
-    <span class="cd-codigo display" aria-hidden="true">403</span>
+  <div class="comp">
+    <article class="pase p-card" data-pase data-reveal="scale">
+      <div class="talon">
+        <button class="candado" type="button" data-candado aria-label="Intentar abrir el candado">
+          <svg viewBox="0 0 120 140" width="96" height="112" fill="none" aria-hidden="true">
+            <path class="arco" d="M30 64V42a30 30 0 0 1 60 0v22" stroke="#c0d5ff" stroke-width="12" stroke-linecap="round" />
+            <rect x="10" y="60" width="100" height="76" rx="16" fill="#5471ff" />
+            <circle cx="60" cy="92" r="10" fill="#fff" />
+            <path d="M55 98h10l-2 18h-6Z" fill="#fff" />
+          </svg>
+        </button>
+        <p class="p-over solo">Solo admin</p>
+        <p class="p-hint">Tu nivel: Equipo</p>
+      </div>
 
-    <button class="cd-lock" type="button" data-lock aria-label="Intentar abrir el candado">
-      <svg viewBox="0 0 120 150" width="120" height="150" aria-hidden="true">
-        <path class="cd-arco" d="M30 70V45a30 30 0 0 1 60 0v25" fill="none" stroke="#c0d5ff" stroke-width="12" stroke-linecap="round" />
-        <rect x="10" y="66" width="100" height="78" rx="16" fill="#5471ff" />
-        <rect x="10" y="66" width="100" height="78" rx="16" fill="none" stroke="rgb(255 255 255 / .35)" stroke-width="2" />
-        <circle cx="60" cy="98" r="10" fill="#16076a" />
-        <path d="M55 104h10l-2 18h-6Z" fill="#16076a" />
-      </svg>
-    </button>
+      <div class="cuerpo">
+        <span class="badge badge-red">Error 403 · Acceso denegado</span>
+        <h1 class="p-title">Este pase no abre esta puerta.</h1>
+        <p class="p-text">Tu usuario no tiene los permisos necesarios para ver estas configuraciones o analíticas. Pedile al administrador de tu negocio que revise tus niveles de acceso.</p>
+        <div class="p-acciones">
+          <a class="btn btn-solid-blue" href={ruta("/")}>Volver al inicio</a>
+          <a class="btn btn-white-gray" href={ruta("/")}>Pedir acceso al admin</a>
+        </div>
+      </div>
 
-    <span class="cd-intentos" data-intentos aria-hidden="true"></span>
-    <p class="escenario-msg" data-msg aria-live="polite">Tocá el candado. Capaz que hoy abre.</p>
+      <span class="sello" data-sello aria-hidden="true">Sin acceso</span>
+    </article>
+
+    <p class="p-hint pista" data-pista aria-live="polite">El candado no acepta sellos dobles. Ya probamos.</p>
   </div>
-</ErrorPage>
+</PanelShell>
 
 <style>
-  .candado {
+  .comp {
+    width: min(760px, 100%);
     display: grid;
-    place-items: center;
-    background:
-      repeating-linear-gradient(-45deg, rgb(255 255 255 / .03) 0 18px, transparent 18px 36px),
-      var(--navy);
-  }
-  .cd-codigo {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    font-size: clamp(120px, 26vw, 230px);
-    color: transparent;
-    -webkit-text-stroke: 2px rgb(255 255 255 / .14);
-    pointer-events: none;
+    justify-items: center;
+    gap: 28px;
   }
 
-  .cd-lock {
+  .pase {
     position: relative;
-    padding: 0;
-    margin-top: -36px;
-    border: 0;
-    background: none;
-    cursor: pointer;
-    filter: drop-shadow(0 18px 30px rgb(6 2 40 / .5));
-    transition: scale .2s var(--ease-rv);
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    width: 100%;
+    border-radius: 20px;
   }
-  .cd-lock:hover { scale: 1.05; }
-  .cd-lock:active { scale: .96; }
-  .cd-lock svg { width: clamp(90px, 16vw, 120px); height: auto; overflow: visible; }
-  .cd-arco { transform-origin: 30px 70px; }
 
-  .cd-lock.sacude { animation: cd-sacude .45s ease-in-out; }
-  .cd-lock.sacude .cd-arco { animation: cd-arco .45s ease-in-out; }
-  @keyframes cd-sacude {
+  .talon {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 36px 28px;
+    background: var(--soft);
+    border-radius: 20px 0 0 20px;
+    border-right: 2px dashed rgb(84 113 255 / .35);
+    text-align: center;
+  }
+  /* Muescas del troquel, del color del fondo de la página. */
+  .talon::before, .talon::after {
+    content: "";
+    position: absolute;
+    right: -15px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+  .talon::before { top: -15px; }
+  .talon::after { bottom: -15px; }
+  .solo { color: var(--indigo); }
+
+  .candado { padding: 0; border: 0; background: none; cursor: pointer; transition: scale .2s var(--ease-rv); }
+  .candado:hover { scale: 1.06; }
+  .candado:active { scale: .95; }
+  .candado svg { overflow: visible; }
+  .candado.sacude { animation: sacude .45s ease-in-out; }
+  .candado.sacude .arco { animation: arco .45s ease-in-out; }
+  @keyframes sacude {
     0%, 100% { rotate: 0deg; }
-    20% { rotate: -9deg; }
+    20% { rotate: -10deg; }
     40% { rotate: 8deg; }
     60% { rotate: -5deg; }
     80% { rotate: 3deg; }
   }
-  /* El arco sube un poquito... y vuelve a bajar. */
-  @keyframes cd-arco {
+  @keyframes arco {
     0%, 100% { translate: 0 0; }
-    35% { translate: 0 -9px; }
+    35% { translate: 0 -8px; }
     55% { translate: 0 0; }
   }
 
-  .cd-intentos {
-    position: absolute;
-    top: 16px; right: 18px;
-    font-family: var(--font-ui);
-    font-size: 12px;
-    font-weight: 500;
-    color: rgb(255 255 255 / .6);
+  .cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 36px 40px;
   }
 
-  /* Estrellitas de "¡clonk!" al golpear. */
-  :global(.cd-chispa) {
+  /* Sello de goma, encima de la esquina del pase. */
+  .sello {
     position: absolute;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #ffc728;
+    top: -22px; right: -18px;
+    padding: 8px 16px;
+    border: 3px solid var(--red-600);
+    border-radius: var(--r-lg);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--red-600);
+    opacity: .85;
+    rotate: 12deg;
     pointer-events: none;
-    animation: cd-chispa .6s var(--ease-rv) forwards;
   }
-  @keyframes cd-chispa {
-    from { opacity: 1; translate: 0 0; scale: 1; }
-    to   { opacity: 0; translate: var(--dx) var(--dy); scale: .3; }
+  .sello.golpe { animation: golpe .4s cubic-bezier(.34, 1.56, .64, 1); }
+  @keyframes golpe {
+    0% { scale: 1.6; opacity: 0; }
+    100% { scale: 1; opacity: .85; }
   }
+
+  .pista { text-align: center; }
 
   @media (prefers-reduced-motion: reduce) {
-    .cd-lock.sacude, .cd-lock.sacude .cd-arco { animation: none; }
+    .candado.sacude, .candado.sacude .arco, .sello.golpe { animation: none; }
+  }
+  @media (max-width: 700px) {
+    .pase { grid-template-columns: 1fr; }
+    .talon { border-radius: 20px 20px 0 0; border-right: 0; border-bottom: 2px dashed rgb(84 113 255 / .35); flex-direction: row; flex-wrap: wrap; padding: 24px; }
+    .talon::before, .talon::after { top: auto; bottom: -15px; right: auto; }
+    .talon::before { left: -15px; }
+    .talon::after { right: -15px; }
+    .candado svg { width: 64px; height: auto; }
+    .cuerpo { padding: 28px 24px; }
+    .sello { right: 8px; top: -18px; font-size: 18px; }
   }
 </style>
 
 <script>
-  const esc = document.querySelector<HTMLElement>("[data-candado]")!;
-  const lock = esc.querySelector<HTMLButtonElement>("[data-lock]")!;
-  const msg = esc.querySelector<HTMLElement>("[data-msg]")!;
-  const contador = esc.querySelector<HTMLElement>("[data-intentos]")!;
+  const pase = document.querySelector<HTMLElement>("[data-pase]")!;
+  const candado = pase.querySelector<HTMLButtonElement>("[data-candado]")!;
+  const sello = pase.querySelector<HTMLElement>("[data-sello]")!;
+  const pista = document.querySelector<HTMLElement>("[data-pista]")!;
 
   const frases = [
     "Nop. Sigue cerrado.",
     "Probaste con más fuerza. Sigue cerrado.",
     "Ni con sellos dobles abre.",
     "Este candado no se deja convencer.",
-    "¿Y si probás con el admin de tu negocio?",
-    "En serio: la llave la tiene tu admin.",
+    "En serio: la llave la tiene el admin de tu negocio.",
     "El candado te pide que dejes de tocarlo.",
   ];
   let n = 0;
 
-  lock.addEventListener("click", () => {
-    n++;
-    msg.textContent = frases[Math.min(n - 1, frases.length - 1)];
-    contador.textContent = `Intentos: ${n}`;
+  const reinicia = (el: Element, clase: string) => {
+    el.classList.remove(clase);
+    void (el as HTMLElement).offsetWidth;
+    el.classList.add(clase);
+  };
 
-    lock.classList.remove("sacude");
-    void lock.offsetWidth;   // reinicia la animación
-    lock.classList.add("sacude");
-
-    // Chispas desde el centro del candado.
-    const r = lock.getBoundingClientRect();
-    const re = esc.getBoundingClientRect();
-    const cx = r.left - re.left + r.width / 2;
-    const cy = r.top - re.top + r.height * 0.6;
-    for (let i = 0; i < 7; i++) {
-      const s = document.createElement("span");
-      s.className = "cd-chispa";
-      const a = Math.random() * Math.PI * 2;
-      const d = 50 + Math.random() * 50;
-      s.style.left = `${cx}px`;
-      s.style.top = `${cy}px`;
-      s.style.setProperty("--dx", `${Math.cos(a) * d}px`);
-      s.style.setProperty("--dy", `${Math.sin(a) * d}px`);
-      esc.append(s);
-      s.addEventListener("animationend", () => s.remove());
-    }
+  candado.addEventListener("click", () => {
+    pista.textContent = frases[Math.min(n++, frases.length - 1)];
+    reinicia(candado, "sacude");
+    reinicia(sello, "golpe");
   });
 </script>

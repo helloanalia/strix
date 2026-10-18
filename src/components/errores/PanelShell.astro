@@ -1,0 +1,157 @@
+---
+/**
+ * Marco del panel para las páginas de error que se ven con la sesión
+ * iniciada (404, 403, 500, sin conexión): el sidebar del DLS a la izquierda
+ * y el contenido centrado sobre el fondo gris. Copia el "Sidebar menu" de
+ * las pantallas de la página Local del Figma Strix APP.
+ *
+ * El sidebar es una réplica visual: esta web no tiene el panel, así que los
+ * ítems no navegan.
+ */
+import Layout from "../../layouts/Layout.astro";
+import { ruta } from "../../lib/ruta";
+import "../../styles/panel.css";
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+}
+const { titulo, descripcion } = Astro.props;
+
+// Íconos lucide, los mismos que usa el sidebar del Figma.
+const iconos: Record<string, string> = {
+  inicio: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/>',
+  fidelizacion: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
+  campanas: '<path d="m3 11 18-5v12L3 14v-3Z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+  menu: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+  clientes: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  premio: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.7V17c0 .6-.5 1-1 1.2C7.8 18.8 7 20.2 7 22M14 14.7V17c0 .6.5 1 1 1.2 1.2.6 2 2 2 3.8M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  sellos: '<path d="M5 22h14M19.3 14.3A2.4 2.4 0 0 0 17.6 14H6.4a2.4 2.4 0 0 0-2.4 2.4V19h16v-2.6c0-.6-.3-1.2-.7-1.7ZM15 14V9.5a3 3 0 1 0-6 0V14"/>',
+  equipo: '<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9M12 12v3"/>',
+  salir: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+};
+
+const grupos = [
+  { titulo: "", items: [
+    { id: "inicio", texto: "Inicio" },
+    { id: "fidelizacion", texto: "Fidelización", badge: "Activa" },
+    { id: "campanas", texto: "Campañas" },
+    { id: "menu", texto: "Menú" },
+    { id: "clientes", texto: "Clientes" },
+  ]},
+  { titulo: "Mostrador", items: [
+    { id: "premio", texto: "Canjear premio" },
+    { id: "sellos", texto: "Dar sellos" },
+  ]},
+  { titulo: "Negocio", items: [
+    { id: "equipo", texto: "Equipo" },
+  ]},
+];
+---
+
+<Layout title={`${titulo} — strix`} description={descripcion}>
+  <div class="panel shell">
+    <aside class="sb" aria-label="Menú del panel">
+      <a class="sb-logo" href={ruta("/")} aria-label="strix — inicio">
+        <img src={ruta("/img/logo-strix-oscuro.svg")} alt="strix" width="88" height="35" />
+      </a>
+
+      <nav class="sb-nav" aria-label="Secciones del panel">
+        {grupos.map((g) => (
+          <div class="sb-grupo">
+            {g.titulo && <p class="sb-titulo">{g.titulo}</p>}
+            {g.items.map((it) => (
+              <span class="sb-item" aria-disabled="true">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+                  set:html={iconos[it.id]} />
+                {it.texto}
+                {it.badge && <span class="badge badge-green sb-badge"><i></i>{it.badge}</span>}
+              </span>
+            ))}
+          </div>
+        ))}
+        <span class="sb-item" aria-disabled="true">
+          <span class="sb-avatar" aria-hidden="true">CC</span>
+          Cuenta
+        </span>
+      </nav>
+
+      <span class="sb-item sb-salir" aria-disabled="true">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+          set:html={iconos.salir} />
+        Salir
+      </span>
+    </aside>
+
+    <main class="contenido">
+      <slot />
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .shell { display: flex; }
+
+  /* --- sidebar (Figma "Sidebar menu": 289px, padding 16, radio 24) --- */
+  .sb {
+    position: sticky;
+    top: 0;
+    flex: none;
+    width: 289px;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 16px;
+    background: var(--card);
+    border-radius: 0 24px 24px 0;
+  }
+  .sb-logo { padding: 12px 4px 4px; }
+  .sb-logo img { width: 88px; height: auto; }
+  .sb-nav { flex: 1; display: flex; flex-direction: column; gap: 16px; }
+  .sb-grupo { display: flex; flex-direction: column; gap: 4px; }
+  .sb-titulo { margin: 0 0 4px; font-size: 14px; color: var(--muted); }
+  .sb-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: var(--r-lg);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--indigo);
+  }
+  .sb-badge { margin-left: auto; padding: 2px 8px; font-size: 11px; }
+  .sb-badge i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .sb-avatar {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    margin-left: -4px;
+    border-radius: 50%;
+    background: #14532d;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+  }
+
+  .contenido {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    place-items: center;
+    padding: 48px 24px;
+  }
+
+  /* En celular el panel no muestra el sidebar fijo: queda el logo arriba. */
+  @media (max-width: 900px) {
+    .shell { flex-direction: column; }
+    .sb { position: static; width: auto; height: auto; border-radius: 0 0 24px 24px; padding: 8px 16px; }
+    .sb-nav, .sb-salir { display: none; }
+    .contenido { padding: 32px 16px 48px; }
+  }
+</style>

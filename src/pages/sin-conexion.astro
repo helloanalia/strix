@@ -1,248 +1,193 @@
 ---
-// Sin conexión — Figma 376:15752.
-// Escenario: una tarjeta de sellos que funciona sin wifi. Se completa tocando
-// los casilleros. Arriba, un indicador que avisa en vivo cuando vuelve la red.
-import ErrorPage from "../components/ErrorPage.astro";
+// Sin conexión — Figma Strix APP › System › Errores/04-sin-conexion.
+// Una tarjeta con el enchufe suelto arriba. Tocar la ficha intenta
+// enchufarla: sin red rebota, con red engancha. El badge sigue el estado
+// real de la conexión.
+import PanelShell from "../components/errores/PanelShell.astro";
 import { ruta } from "../lib/ruta";
-
-const casilleros = Array.from({ length: 10 }, (_, i) => i + 1);
 ---
 
-<ErrorPage
-  titulo="Sin conexión a la red."
-  texto="Parece que te quedaste sin internet. Revisá tu red para seguir viendo tus estadísticas y registrando las visitas de tus clientes en tiempo real."
-  icono="wifi"
-  badge="Sin conexión"
-  boton={null}
+<PanelShell
+  titulo="Sin conexión a la red"
+  descripcion="Parece que te quedaste sin internet. Revisá tu red para seguir viendo tus estadísticas."
 >
-  <div class="escenario sellos" data-sellos>
-    <span class="sl-estado" data-estado>
-      <span class="sl-punto"></span>
-      <span data-estado-txt>Sin conexión</span>
-    </span>
-
-    <div class="sl-tarjeta" data-tarjeta>
-      <div class="sl-cabeza">
-        <img src={ruta("/img/logo-strix.svg")} alt="" width="62" height="25" />
-        <span>Tarjeta offline · <b data-cuenta>0</b>/10</span>
-      </div>
-      <div class="sl-grilla">
-        {casilleros.map((n) => (
-          <button class="sl-casillero" type="button" aria-label={`Sellar casillero ${n}`}>
-            <span class="sl-num" aria-hidden="true">{n === 10 ? "☕" : n}</span>
-            <svg class="sl-sello" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="m6 12.5 4 4 8-9" />
-            </svg>
-          </button>
-        ))}
-      </div>
+  <article class="tarjeta p-card" data-tarjeta data-reveal="scale">
+    <div class="enchufe" data-enchufe>
+      <button class="ficha" type="button" data-ficha aria-label="Intentar enchufar">
+        <svg viewBox="0 0 220 80" width="220" height="80" fill="none" aria-hidden="true">
+          <path d="M-400 40H120" stroke="#1e2126" stroke-width="6" stroke-linecap="round" />
+          <rect x="118" y="16" width="60" height="48" rx="12" fill="#5471ff" />
+          <rect x="130" y="30" width="20" height="4" rx="2" fill="rgb(255 255 255 / .6)" />
+          <rect x="178" y="25" width="26" height="7" rx="3.5" fill="#1e2126" />
+          <rect x="178" y="48" width="26" height="7" rx="3.5" fill="#1e2126" />
+        </svg>
+      </button>
+      <svg class="chispas" viewBox="0 0 64 64" width="56" height="56" fill="none" aria-hidden="true">
+        <path d="M32 6v12M32 46v12M8 32h12M44 32h12M15 15l8 8M41 41l8 8M49 15l-8 8M23 41l-8 8" stroke="#ffc728" stroke-width="3" stroke-linecap="round" />
+      </svg>
+      <svg class="toma" viewBox="0 0 220 80" width="220" height="80" fill="none" aria-hidden="true">
+        <path d="M100 40h520" stroke="#1e2126" stroke-width="6" stroke-linecap="round" />
+        <rect class="toma-cuerpo" x="36" y="12" width="66" height="56" rx="14" fill="#c0d5ff" />
+        <rect x="44" y="25" width="12" height="7" rx="3.5" fill="#1e2126" />
+        <rect x="44" y="48" width="12" height="7" rx="3.5" fill="#1e2126" />
+      </svg>
     </div>
 
-    <p class="escenario-msg" data-msg aria-live="polite">Mientras vuelve internet, completá esta tarjeta. Esta sí anda sin wifi.</p>
-  </div>
+    <span class="badge badge-red" data-estado aria-live="polite">Sin conexión</span>
+    <h1 class="p-title">Se desenchufó internet.</h1>
+    <p class="p-text">Parece que te quedaste sin internet. Revisá tu red para seguir viendo tus estadísticas y registrando las visitas de tus clientes en tiempo real.</p>
 
-  <a slot="acciones" class="btn btn-ghost-light" href={ruta("/")} data-reintentar>Reintentar</a>
-</ErrorPage>
+    <div class="espera" aria-hidden="true">
+      <p class="p-over">Tus estadísticas</p>
+      {[220, 160, 260].map((w, i) => (
+        <div class="fila" style={`--o:${[1, .7, .45][i]}`}>
+          <span class="av"></span>
+          <span class="dato" style={`width:${w}px`}></span>
+          <span class="p-hint">Esperando red…</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="pie">
+      <a class="btn btn-solid-blue" href={ruta("/")} data-reintentar>Reintentar</a>
+      <p class="p-hint" data-pista aria-live="polite">Probá apagar y prender el router. Funciona casi siempre.</p>
+    </div>
+  </article>
+</PanelShell>
 
 <style>
-  .sellos {
-    display: grid;
-    place-items: center;
-    padding-bottom: 40px;
-    background:
-      radial-gradient(circle at 50% 0%, rgb(84 113 255 / .28), transparent 60%),
-      var(--navy);
-  }
-
-  .sl-estado {
-    position: absolute;
-    top: 16px; left: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    border-radius: var(--r-full);
-    background: rgb(220 38 38 / .18);
-    font-family: var(--font-ui);
-    font-size: 12px;
-    font-weight: 500;
-    color: #fecaca;
-    transition: background-color .3s, color .3s;
-  }
-  .sl-punto { width: 8px; height: 8px; border-radius: 50%; background: var(--red-600); }
-  .sl-estado.online { background: rgb(145 210 41 / .3); color: #ecfccb; }
-  .sl-estado.online .sl-punto { background: var(--green); }
-  @media (prefers-reduced-motion: no-preference) {
-    .sl-punto { animation: sl-late 1.4s ease-in-out infinite; }
-  }
-  @keyframes sl-late { 50% { opacity: .3; } }
-
-  .sl-tarjeta {
-    width: min(420px, 100% - 32px);
-    padding: 18px 20px 20px;
-    border-radius: 18px;
-    background: linear-gradient(135deg, var(--indigo), #7d59ff);
-    box-shadow: 0 24px 48px rgb(6 2 40 / .45);
-    rotate: -2deg;
-    transition: rotate .5s var(--ease-rv), scale .5s var(--ease-rv);
-  }
-  .sl-tarjeta:hover { rotate: 0deg; }
-  .sl-tarjeta.completa { animation: sl-festeja .7s var(--ease-rv); }
-  @keyframes sl-festeja {
-    0% { scale: 1; rotate: -2deg; }
-    40% { scale: 1.08; rotate: 3deg; }
-    100% { scale: 1; rotate: 0deg; }
-  }
-
-  .sl-cabeza {
+  .tarjeta {
+    width: min(640px, 100%);
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-    font-family: var(--font-ui);
-    font-size: 12px;
-    color: rgb(255 255 255 / .8);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 32px;
   }
-  .sl-cabeza img { width: 62px; height: auto; }
 
-  .sl-grilla {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-  }
-  .sl-casillero {
+  .enchufe {
     position: relative;
-    display: grid;
-    place-items: center;
-    aspect-ratio: 1;
+    align-self: stretch;
+    height: 140px;
+    border-radius: 12px;
+    background: rgb(238 241 255 / .6);
+    overflow: hidden;
+  }
+  .ficha {
+    position: absolute;
+    left: -10px; top: 30px;
     padding: 0;
-    border: 1.5px dashed rgb(255 255 255 / .6);
-    border-radius: 50%;
-    background: rgb(255 255 255 / .1);
-    color: #fff;
+    border: 0;
+    background: none;
     cursor: pointer;
-    transition: background-color .2s;
+    rotate: 4deg;
+    transition: translate .35s var(--ease-rv), rotate .35s var(--ease-rv);
   }
-  .sl-casillero:hover { background: rgb(255 255 255 / .2); }
-  .sl-num { font-family: var(--font-ui); font-size: 13px; font-weight: 600; opacity: .7; }
-  /* El último casillero es el premio. */
-  .sl-casillero:last-child .sl-num { font-size: 22px; opacity: 1; }
-  .sl-sello {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    padding: 22%;
-    border-radius: 50%;
-    background: #fff;
-    color: var(--indigo);
-    opacity: 0;
-    scale: 1.8;
-    rotate: -25deg;
+  .ficha svg, .toma { overflow: visible; display: block; }
+  .ficha:hover { translate: 8px 0; }
+  .toma { position: absolute; right: -10px; top: 30px; }
+  .chispas { position: absolute; left: 50%; top: 42px; translate: -50% 0; transition: opacity .3s; }
+  @media (prefers-reduced-motion: no-preference) {
+    .chispas { animation: chisporrotea 1.2s steps(2) infinite; }
   }
-  .sl-casillero.sellado { border-style: solid; border-color: #fff; }
-  .sl-casillero.sellado .sl-sello {
-    opacity: 1;
-    scale: 1;
-    rotate: 0deg;
-    transition: opacity .15s, scale .35s cubic-bezier(.34, 1.56, .64, 1), rotate .35s var(--ease-rv);
-  }
+  @keyframes chisporrotea { 50% { scale: .7; opacity: .5; } }
 
-  /* Papel picado al completar. */
-  :global(.sl-confeti) {
-    position: absolute;
-    width: 8px; height: 12px;
-    border-radius: 2px;
-    pointer-events: none;
-    animation: sl-confeti 1.4s cubic-bezier(.2, .7, .4, 1) forwards;
+  /* Intento sin red: avanza y rebota. */
+  .ficha.rebota { animation: rebota .6s var(--ease-rv); }
+  @keyframes rebota {
+    45% { translate: var(--hasta) 0; rotate: 0deg; }
+    60% { translate: calc(var(--hasta) - 30px) 0; rotate: 8deg; }
+    100% { translate: 0 0; rotate: 4deg; }
   }
-  @keyframes sl-confeti {
-    from { opacity: 1; translate: 0 0; rotate: 0deg; }
-    to   { opacity: 0; translate: var(--dx) var(--dy); rotate: var(--r); }
+  /* Con red: queda enchufada. */
+  .enchufe.conectado .ficha { translate: var(--hasta) 0; rotate: 0deg; }
+  .enchufe.conectado .chispas { opacity: 0; }
+  .enchufe.conectado .toma-cuerpo { fill: #91d229; transition: fill .3s; }
+
+  .espera {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+  .fila { display: flex; align-items: center; gap: 12px; opacity: var(--o); }
+  .fila .p-hint { margin-left: auto; white-space: nowrap; }
+  .av { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--neutral); }
+  .dato {
+    max-width: 50%;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--neutral) 40%, #ececec 50%, var(--neutral) 60%) 0 0 / 300% 100%;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .dato { animation: brillo 1.8s linear infinite; }
+  }
+  @keyframes brillo { to { background-position: -150% 0; } }
+
+  .pie { align-self: stretch; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+  @media (max-width: 640px) {
+    .tarjeta { padding: 24px 20px; }
+    .ficha svg, .toma { width: 160px; height: auto; }
   }
 </style>
 
 <script>
-  const esc = document.querySelector<HTMLElement>("[data-sellos]")!;
-  const tarjeta = esc.querySelector<HTMLElement>("[data-tarjeta]")!;
-  const cuenta = esc.querySelector<HTMLElement>("[data-cuenta]")!;
-  const msg = esc.querySelector<HTMLElement>("[data-msg]")!;
-  const casilleros = [...esc.querySelectorAll<HTMLButtonElement>(".sl-casillero")];
-  const estado = esc.querySelector<HTMLElement>("[data-estado]")!;
-  const estadoTxt = esc.querySelector<HTMLElement>("[data-estado-txt]")!;
+  const enchufe = document.querySelector<HTMLElement>("[data-enchufe]")!;
+  const ficha = enchufe.querySelector<HTMLButtonElement>("[data-ficha]")!;
+  const estado = document.querySelector<HTMLElement>("[data-estado]")!;
+  const pista = document.querySelector<HTMLElement>("[data-pista]")!;
 
-  // Reintentar = volver a cargar lo que se estaba viendo antes de caer acá.
+  // Cuánto tiene que avanzar la ficha para entrar en la toma.
+  const medir = () => {
+    const toma = enchufe.querySelector<SVGElement>(".toma")!;
+    const hueco = toma.getBoundingClientRect().left - ficha.getBoundingClientRect().right;
+    const escala = toma.getBoundingClientRect().width / 220;
+    ficha.style.setProperty("--hasta", `${hueco + 62 * escala}px`);
+  };
+
+  const pintar = () => {
+    const on = navigator.onLine;
+    estado.textContent = on ? "Conexión recuperada" : "Sin conexión";
+    estado.classList.toggle("badge-red", !on);
+    estado.classList.toggle("badge-green", on);
+    if (!on) enchufe.classList.remove("conectado");
+  };
+
+  const frases = [
+    "Rebotó. Internet sigue sin aparecer.",
+    "Nada. Capaz que el router está de mal humor.",
+    "Mientras tanto podés ir preparando un café.",
+  ];
+  let n = 0;
+
+  ficha.addEventListener("click", () => {
+    medir();
+    if (navigator.onLine) {
+      enchufe.classList.add("conectado");
+      pista.textContent = "¡Enchufado! Ya podés reintentar.";
+      return;
+    }
+    ficha.classList.remove("rebota");
+    void ficha.offsetWidth;
+    ficha.classList.add("rebota");
+    pista.textContent = frases[n++ % frases.length];
+  });
+
+  window.addEventListener("online", () => {
+    pintar();
+    medir();
+    enchufe.classList.add("conectado");
+    pista.textContent = "¡Volvió internet! Ya podés reintentar.";
+  });
+  window.addEventListener("offline", pintar);
+  pintar();
+
+  // Reintentar = volver a lo que se estaba viendo antes de caer acá.
   document.querySelector<HTMLAnchorElement>("[data-reintentar]")!.addEventListener("click", (e) => {
     if (history.length > 1) { e.preventDefault(); history.back(); }
   });
-
-  // --- red, en vivo ---
-  const pintarRed = () => {
-    const on = navigator.onLine;
-    estado.classList.toggle("online", on);
-    estadoTxt.textContent = on ? "¡Volvió la conexión!" : "Sin conexión";
-  };
-  window.addEventListener("online", () => {
-    pintarRed();
-    msg.textContent = "¡Volvió internet! Ya podés reintentar.";
-  });
-  window.addEventListener("offline", pintarRed);
-  pintarRed();
-
-  // --- sellos ---
-  const frases = [
-    "¡Primer sello! Así empiezan los fans.",
-    "Dos. Vas bien.",
-    "Tres sellos y ni un mega consumido.",
-    "Cuatro. Ya sos cliente frecuente.",
-    "La mitad. El router todavía está pensando.",
-    "Seis. ¿Probaste apagarlo y prenderlo?",
-    "Siete. Ya casi.",
-    "Ocho. Se huele el café.",
-    "Nueve. Uno más...",
-  ];
-
-  const papelPicado = () => {
-    const colores = ["#ffc728", "#91d229", "#54ffe0", "#ffffff", "#c0d5ff"];
-    const r = tarjeta.getBoundingClientRect();
-    const re = esc.getBoundingClientRect();
-    for (let i = 0; i < 40; i++) {
-      const c = document.createElement("span");
-      c.className = "sl-confeti";
-      c.style.background = colores[i % colores.length];
-      c.style.left = `${r.left - re.left + r.width / 2}px`;
-      c.style.top = `${r.top - re.top + r.height / 2}px`;
-      c.style.setProperty("--dx", `${(Math.random() - 0.5) * 520}px`);
-      c.style.setProperty("--dy", `${(Math.random() - 0.7) * 320}px`);
-      c.style.setProperty("--r", `${Math.random() * 720 - 360}deg`);
-      esc.append(c);
-      c.addEventListener("animationend", () => c.remove());
-    }
-  };
-
-  let reinicio: number | undefined;
-  casilleros.forEach((b) => b.addEventListener("click", () => {
-    // Se sella siempre el próximo libre, toques el que toques: como en la vida real.
-    const libre = casilleros.find((c) => !c.classList.contains("sellado"));
-    if (!libre) return;
-    libre.classList.add("sellado");
-    const n = casilleros.filter((c) => c.classList.contains("sellado")).length;
-    cuenta.textContent = String(n);
-
-    if (n < 10) {
-      msg.textContent = frases[n - 1];
-      return;
-    }
-    msg.textContent = "¡Tarjeta completa! Te ganaste un café (imaginario, sin wifi no podemos más).";
-    tarjeta.classList.add("completa");
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) papelPicado();
-    clearTimeout(reinicio);
-    reinicio = window.setTimeout(() => {
-      casilleros.forEach((c) => c.classList.remove("sellado"));
-      tarjeta.classList.remove("completa");
-      cuenta.textContent = "0";
-      msg.textContent = "Tarjeta nueva. Si internet sigue sin volver, ya sabés qué hacer.";
-    }, 3500);
-  }));
 </script>

@@ -1,0 +1,108 @@
+---
+/**
+ * Marco tipo login para las páginas de error que se ven sin sesión
+ * (sesión expirada, mantenimiento): una sola caja con el panel índigo a la
+ * izquierda y el panel claro a la derecha, como Cuenta/00-login del Figma.
+ *
+ * Slots: "panel" (la ilustración del lado índigo) y el contenido por defecto.
+ */
+import Layout from "../../layouts/Layout.astro";
+import { ruta } from "../../lib/ruta";
+import "../../styles/panel.css";
+
+interface Props {
+  titulo: string;
+  descripcion: string;
+  /** Frase grande al pie del panel índigo. */
+  bajada: string;
+}
+const { titulo, descripcion, bajada } = Astro.props;
+---
+
+<Layout title={`${titulo} — strix`} description={descripcion}>
+  <main class="panel login">
+    <div class="caja">
+      <div class="lado-indigo">
+        <span class="trazo t1" aria-hidden="true"></span>
+        <span class="trazo t2" aria-hidden="true"></span>
+        <div class="ilustracion"><slot name="panel" /></div>
+        <p class="bajada">{bajada}</p>
+      </div>
+      <div class="lado-claro">
+        <a href={ruta("/")} aria-label="strix — inicio">
+          <img class="logo" src={ruta("/img/logo-strix-oscuro.svg")} alt="strix" width="132" height="52" />
+        </a>
+        <slot />
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .login {
+    display: grid;
+    place-items: center;
+    padding: 48px 24px;
+  }
+  .caja {
+    display: grid;
+    grid-template-columns: 520fr 600fr;
+    width: min(1120px, 100%);
+    min-height: 680px;
+    border-radius: 24px;
+    background: var(--card);
+    box-shadow: 0 24px 48px rgb(30 33 38 / .08);
+    overflow: hidden;
+  }
+
+  .lado-indigo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40px 60px 56px;
+    background: var(--indigo);
+    border-radius: 24px 0 0 24px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* La "x" grande del login, de fondo. */
+  .trazo {
+    position: absolute;
+    z-index: -1;
+    left: 50%; top: -20%;
+    width: 120px;
+    height: 140%;
+    background: rgb(255 255 255 / .08);
+  }
+  .t1 { rotate: 38deg; translate: -60px 0; }
+  .t2 { rotate: -38deg; translate: -60px 0; }
+
+  .ilustracion { position: relative; flex: 1; min-height: 360px; }
+  .bajada {
+    margin: 0;
+    max-width: 400px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 32px;
+    color: #fff;
+    text-wrap: balance;
+  }
+
+  .lado-claro {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 56px 64px;
+  }
+  .logo { width: 132px; height: auto; }
+
+  @media (max-width: 900px) {
+    .caja { grid-template-columns: 1fr; min-height: 0; }
+    .lado-indigo { border-radius: 24px 24px 0 0; padding: 24px 24px 32px; }
+    .ilustracion { min-height: 300px; }
+    .lado-claro { padding: 32px 24px 40px; }
+  }
+</style>
