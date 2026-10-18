@@ -1,0 +1,210 @@
+---
+// Error 500 — Figma 376:15776.
+// Escenario: el gráfico de visitas se desarmó. Se le puede dar un golpecito,
+// como a la tele vieja: a veces se acomoda... un ratito.
+import ErrorPage from "../components/ErrorPage.astro";
+
+const dias = ["L", "M", "M", "J", "V", "S", "D"];
+---
+
+<ErrorPage
+  titulo="Error 500 — Error interno del servidor."
+  texto="Tuvimos un error técnico de nuestro lado. Ya estamos trabajando para solucionarlo rápido y que puedas seguir cruzando datos y conociendo mejor el consumo de tus clientes."
+  icono="prohibido"
+  badge="Error interno"
+>
+  <div class="escenario grafico" data-grafico>
+    <span class="gr-codigo display" aria-hidden="true">500</span>
+
+    <div class="gr-barras" data-barras aria-hidden="true">
+      {dias.map((d) => (
+        <div class="gr-col">
+          <span class="gr-barra"></span>
+          <span class="gr-dia">{d}</span>
+        </div>
+      ))}
+    </div>
+
+    <span class="gr-chispa c1" aria-hidden="true"></span>
+    <span class="gr-chispa c2" aria-hidden="true"></span>
+    <span class="gr-humo" aria-hidden="true"></span>
+
+    <button class="btn btn-ghost-light gr-golpe" type="button" data-golpe>Darle un golpecito</button>
+    <p class="escenario-msg" data-msg aria-live="polite">El gráfico de visitas se desarmó. Ya lo estamos arreglando.</p>
+  </div>
+</ErrorPage>
+
+<style>
+  .grafico {
+    background:
+      linear-gradient(rgb(255 255 255 / .05) 1px, transparent 1px) 0 0 / 100% 48px,
+      var(--navy);
+  }
+  .grafico.sacude { animation: gr-sacude .4s ease-in-out; }
+  @keyframes gr-sacude {
+    0%, 100% { translate: 0 0; }
+    25% { translate: -6px 2px; }
+    50% { translate: 5px -2px; }
+    75% { translate: -3px 1px; }
+  }
+
+  .gr-codigo {
+    position: absolute;
+    top: 14px; left: 22px;
+    font-size: clamp(48px, 9vw, 72px);
+    color: rgb(255 255 255 / .12);
+  }
+
+  .gr-barras {
+    position: absolute;
+    left: 12%; right: 12%;
+    top: 22%; bottom: 78px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 3%;
+  }
+  .gr-col {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+  }
+  .gr-barra {
+    --h: 40%;
+    --rot: 0deg;
+    --dy: 0px;
+    width: 100%;
+    max-width: 46px;
+    height: var(--h);
+    border-radius: 8px 8px 3px 3px;
+    background: linear-gradient(var(--indigo), #7d59ff);
+    transform-origin: bottom center;
+    rotate: var(--rot);
+    translate: 0 var(--dy);
+    transition:
+      height .7s cubic-bezier(.34, 1.56, .64, 1),
+      rotate .7s cubic-bezier(.34, 1.56, .64, 1),
+      translate .7s cubic-bezier(.34, 1.56, .64, 1),
+      background .4s;
+  }
+  .gr-barras.ok .gr-barra { background: linear-gradient(var(--green), #16a34a); }
+  .gr-dia {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    color: rgb(255 255 255 / .55);
+  }
+
+  .gr-chispa {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #ffc728;
+    box-shadow: 0 0 12px 3px rgb(255 199 40 / .7);
+    opacity: 0;
+  }
+  .c1 { left: 34%; top: 46%; }
+  .c2 { left: 70%; top: 58%; }
+  .gr-humo {
+    position: absolute;
+    left: 55%; top: 40%;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(rgb(255 255 255 / .25), transparent 70%);
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .gr-chispa { animation: gr-chispa 1.7s steps(1) infinite; }
+    .c2 { animation-delay: .8s; animation-duration: 2.3s; }
+    .gr-humo { animation: gr-humo 3.2s ease-out infinite; }
+    .gr-barras.ok ~ .gr-chispa, .gr-barras.ok ~ .gr-humo { animation: none; }
+  }
+  @keyframes gr-chispa {
+    0%, 100% { opacity: 0; }
+    6% { opacity: 1; }
+    12% { opacity: 0; }
+    16% { opacity: 1; }
+    20% { opacity: 0; }
+  }
+  @keyframes gr-humo {
+    from { opacity: .9; translate: 0 0; scale: .6; }
+    to   { opacity: 0; translate: 10px -70px; scale: 2.2; }
+  }
+
+  .gr-golpe {
+    position: absolute;
+    top: 16px; right: 18px;
+  }
+
+  /* En celular el mensaje ocupa dos líneas: las barras suben para dejarle lugar. */
+  @media (max-width: 640px) {
+    .gr-barras { left: 8%; right: 8%; top: 30%; bottom: 100px; }
+  }
+</style>
+
+<script>
+  const esc = document.querySelector<HTMLElement>("[data-grafico]")!;
+  const caja = esc.querySelector<HTMLElement>("[data-barras]")!;
+  const barras = [...esc.querySelectorAll<HTMLElement>(".gr-barra")];
+  const msg = esc.querySelector<HTMLElement>("[data-msg]")!;
+  const golpe = esc.querySelector<HTMLButtonElement>("[data-golpe]")!;
+
+  const azar = (a: number, b: number) => a + Math.random() * (b - a);
+
+  // Roto: alturas al azar, algunas torcidas y alguna caída.
+  const romper = () => {
+    caja.classList.remove("ok");
+    barras.forEach((b, i) => {
+      const cae = Math.random() < 0.25;
+      b.style.setProperty("--h", `${azar(8, 70)}%`);
+      b.style.setProperty("--rot", cae ? `${(i % 2 ? 1 : -1) * azar(55, 85)}deg` : `${azar(-14, 14)}deg`);
+      b.style.setProperty("--dy", `${azar(0, 6)}px`);
+    });
+  };
+
+  // Arreglado: una semana que va creciendo, como debería.
+  const arreglar = () => {
+    caja.classList.add("ok");
+    const alturas = [32, 44, 40, 58, 70, 88, 76];
+    barras.forEach((b, i) => {
+      b.style.setProperty("--h", `${alturas[i]}%`);
+      b.style.setProperty("--rot", "0deg");
+      b.style.setProperty("--dy", "0px");
+    });
+  };
+
+  const frases = [
+    "Se movió algo. No sabemos si para bien.",
+    "Mmm, casi.",
+    "Este método no figura en el manual, pero bueno.",
+    "Otro más y lo arreglás vos.",
+  ];
+  let golpes = 0;
+  let vuelve: number | undefined;
+
+  golpe.addEventListener("click", () => {
+    golpes++;
+    clearTimeout(vuelve);
+    esc.classList.remove("sacude");
+    void esc.offsetWidth;
+    esc.classList.add("sacude");
+
+    // Cada golpe tiene más chances de acomodarlo. Igual dura poco.
+    if (Math.random() < Math.min(0.2 + golpes * 0.15, 0.85)) {
+      arreglar();
+      msg.textContent = "¡Funcionó! ...por ahora.";
+      vuelve = window.setTimeout(() => {
+        romper();
+        msg.textContent = "Y se volvió a desarmar. Mejor se lo dejamos a nuestro equipo técnico.";
+      }, 2200);
+    } else {
+      romper();
+      msg.textContent = frases[(golpes - 1) % frases.length];
+    }
+  });
+
+  romper();
+</script>

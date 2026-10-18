@@ -1,0 +1,186 @@
+---
+// Mantenimiento programado — Figma 376:15733 (lleva el logo en vez de ícono).
+// Escenario: engranajes que se pueden acelerar a mano y una barra de progreso
+// que cuenta lo que estamos haciendo. Llega al 99% y ahí se queda pensando.
+import ErrorPage from "../components/ErrorPage.astro";
+import { ruta } from "../lib/ruta";
+
+// Engranaje de 10 dientes centrado en (50, 50), en un viewBox de 100×100.
+const engranaje = (() => {
+  const dientes = 10, R = 48, r = 38;
+  const paso = (Math.PI * 2) / dientes;
+  const pt = (a: number, rad: number) =>
+    `${(50 + Math.cos(a) * rad).toFixed(2)} ${(50 + Math.sin(a) * rad).toFixed(2)}`;
+  let d = "";
+  for (let i = 0; i < dientes; i++) {
+    const a = i * paso;
+    d += `${i ? "L" : "M"}${pt(a, r)} L${pt(a + paso * 0.12, R)} L${pt(a + paso * 0.45, R)} L${pt(a + paso * 0.57, r)} `;
+  }
+  return d + "Z";
+})();
+---
+
+<ErrorPage
+  titulo="Sistema en mantenimiento programado."
+  texto="Pusimos el panel en mantenimiento un ratito para mejorar cómo visualizás tus datos y el rendimiento de tus campañas. Volvemos enseguida con un sistema más potente para ayudarte a fidelizar."
+  icono="logo"
+>
+  <div class="escenario taller" data-taller>
+    <button class="tl-motor" type="button" data-motor aria-label="Darle cuerda a los engranajes">
+      <svg class="tl-eng tl-grande" viewBox="0 0 100 100" aria-hidden="true">
+        <path d={engranaje} fill="#5471ff" /><circle cx="50" cy="50" r="15" fill="#1a0d72" />
+      </svg>
+      <svg class="tl-eng tl-chico" viewBox="0 0 100 100" aria-hidden="true">
+        <path d={engranaje} fill="#7d59ff" /><circle cx="50" cy="50" r="15" fill="#1a0d72" />
+      </svg>
+      <svg class="tl-eng tl-mini" viewBox="0 0 100 100" aria-hidden="true">
+        <path d={engranaje} fill="#c0d5ff" /><circle cx="50" cy="50" r="15" fill="#1a0d72" />
+      </svg>
+      <img class="tl-logo" src={ruta("/img/logo-strix.svg")} alt="" width="123" height="49" />
+    </button>
+
+    <div class="tl-progreso" aria-hidden="true">
+      <div class="tl-barra"><span data-relleno></span></div>
+      <span class="tl-pct" data-pct>0%</span>
+    </div>
+
+    <p class="escenario-msg" data-msg aria-live="polite">Calentando motores...</p>
+  </div>
+</ErrorPage>
+
+<style>
+  .taller {
+    background:
+      repeating-linear-gradient(-45deg, rgb(255 199 40 / .06) 0 22px, transparent 22px 44px),
+      var(--navy);
+  }
+
+  .tl-motor {
+    position: absolute;
+    left: 50%; top: 36%;
+    translate: -50% -50%;
+    width: clamp(220px, 40vw, 300px);
+    aspect-ratio: 1.5;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .tl-eng { position: absolute; overflow: visible; }
+  .tl-grande { width: 46%; left: 6%; top: 8%; }
+  .tl-chico  { width: 32%; left: 46%; top: 0%; }
+  .tl-mini   { width: 22%; left: 70%; top: 44%; }
+  /* El giro lo lleva el script: con una animación CSS, cambiar la velocidad
+     a mitad de vuelta hace saltar el engranaje. */
+
+  .tl-logo {
+    position: absolute;
+    left: 50%; bottom: -6%;
+    width: 46%;
+    height: auto;
+    translate: -50% 0;
+    filter: drop-shadow(0 6px 14px rgb(6 2 40 / .6));
+    transition: scale .3s cubic-bezier(.34, 1.56, .64, 1);
+  }
+  .tl-motor:active .tl-logo { scale: .92; }
+
+  .tl-progreso {
+    position: absolute;
+    left: 50%; bottom: 62px;
+    translate: -50% 0;
+    width: min(420px, 100% - 48px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .tl-barra {
+    flex: 1;
+    height: 10px;
+    border-radius: var(--r-full);
+    background: rgb(255 255 255 / .12);
+    overflow: hidden;
+  }
+  .tl-barra span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background:
+      repeating-linear-gradient(-45deg, rgb(255 255 255 / .25) 0 8px, transparent 8px 16px),
+      linear-gradient(90deg, var(--indigo), var(--glow-teal));
+    background-size: 22px 22px, 100% 100%;
+    transition: width .6s var(--ease-rv);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .tl-barra span { animation: tl-rayas .8s linear infinite; }
+  }
+  @keyframes tl-rayas { to { background-position: 22px 0, 0 0; } }
+  .tl-pct {
+    min-width: 3.2em;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
+<script>
+  const esc = document.querySelector<HTMLElement>("[data-taller]")!;
+  const motor = esc.querySelector<HTMLButtonElement>("[data-motor]")!;
+  const relleno = esc.querySelector<HTMLElement>("[data-relleno]")!;
+  const pct = esc.querySelector<HTMLElement>("[data-pct]")!;
+  const msg = esc.querySelector<HTMLElement>("[data-msg]")!;
+
+  const pasos = [
+    "Contando sellos uno por uno...",
+    "Puliendo los gráficos hasta que brillen...",
+    "Enseñándole estadísticas nuevas al búho...",
+    "Ordenando las campañas por color...",
+    "Ajustando tornillos del panel...",
+    "Probando que el botón de canjear siga canjeando...",
+  ];
+
+  let p = 0;
+  let paso = 0;
+  let vel = 1;
+
+  const pintar = () => {
+    relleno.style.width = `${p}%`;
+    pct.textContent = `${Math.floor(p)}%`;
+  };
+
+  // Avanza más lento a medida que se acerca al final, y nunca pasa de 99.
+  const tic = () => {
+    p = Math.min(99, p + Math.max(0.4, (99 - p) * 0.06) * vel);
+    pintar();
+    if (p >= 99) msg.textContent = "99%. El último 1% siempre es el más largo.";
+    else if (Math.random() < 0.18) msg.textContent = pasos[paso++ % pasos.length];
+  };
+  setInterval(tic, 700);
+
+  // Giro: los tres engranajes engranan, así que van en sentidos alternados y
+  // el más chico gira más rápido.
+  const engs = [...esc.querySelectorAll<SVGElement>(".tl-eng")];
+  const relacion = [1, -1.43, 2.1];
+  let angulo = 0;
+  let antes = performance.now();
+  const girar = (t: number) => {
+    angulo += ((t - antes) / 1000) * 40 * vel;
+    antes = t;
+    engs.forEach((e, i) => (e.style.rotate = `${angulo * relacion[i]}deg`));
+    requestAnimationFrame(girar);
+  };
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) requestAnimationFrame(girar);
+
+  // Tocar los engranajes los acelera un rato.
+  let frena: number | undefined;
+  motor.addEventListener("click", () => {
+    vel = Math.min(vel + 1.5, 7);
+    msg.textContent = vel >= 7 ? "¡A toda máquina! Más rápido no da." : "Le diste cuerda. Gracias por la ayuda.";
+    clearTimeout(frena);
+    frena = window.setTimeout(() => {
+      vel = 1;
+    }, 2500);
+  });
+</script>

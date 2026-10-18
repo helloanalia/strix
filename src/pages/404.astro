@@ -1,0 +1,154 @@
+---
+// Error 404 — Figma 376:15788.
+// Escenario: una linterna. Todo está a oscuras y el cursor (o el dedo) ilumina
+// lo que hay escondido: reportes, perfiles, sellos... todo menos la página.
+import ErrorPage from "../components/ErrorPage.astro";
+
+const cosas = [
+  { id: "reporte",  x: 14, y: 26, texto: "Un reporte de ventas. Lindo, pero no es el que buscabas." },
+  { id: "perfil",   x: 80, y: 22, texto: "Un perfil de cliente. Viene seguido, pero no sabe dónde está tu página." },
+  { id: "config",   x: 30, y: 70, texto: "Una configuración olvidada. Mejor no tocarla." },
+  { id: "sello",    x: 68, y: 66, texto: "¡Un sello suelto! Alguien va a estar contento. La página, ni rastro." },
+  { id: "cafe",     x: 50, y: 18, texto: "Un café frío. Llevaba acá desde el lunes." },
+  { id: "buho",     x: 88, y: 72, texto: "El búho de strix. Él tampoco la encontró, y eso que ve de noche." },
+];
+---
+
+<ErrorPage
+  titulo="Error 404 — Página no encontrada."
+  texto="Buscamos por todas partes, pero el reporte, perfil o configuración que intentás ver ya no está disponible. Volvé al panel principal para seguir analizando el movimiento de tu local."
+  icono="grafico"
+>
+  <div class="escenario linterna" data-linterna aria-label="Buscá con la linterna" role="group">
+    <span class="lt-codigo display" aria-hidden="true">404</span>
+
+    {cosas.map((c) => (
+      <button class="lt-cosa" type="button" style={`--x:${c.x}%; --y:${c.y}%`}
+        data-texto={c.texto} aria-label={`Mirar: ${c.id}`}>
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor"
+          stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          {c.id === "reporte" && (<><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="M7 16v-4M12 16V8M17 16v-6" /></>)}
+          {c.id === "perfil" && (<><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>)}
+          {c.id === "config" && (<><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" /></>)}
+          {c.id === "sello" && (<><circle cx="12" cy="12" r="9" stroke-dasharray="3 2.4" /><path d="m8.5 12 2.5 2.5 4.5-5" /></>)}
+          {c.id === "cafe" && (<><path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5Z" /><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17" /><path d="M8 2v3M12 2v3" /></>)}
+          {c.id === "buho" && (<><path d="M5 9c0-3 3-5 7-5s7 2 7 5v6a6 6 0 0 1-6 6h-2a6 6 0 0 1-6-6Z" /><circle cx="9" cy="10" r="2" /><circle cx="15" cy="10" r="2" /><path d="m11 13 1 1.5 1-1.5" /><path d="M5 5 7 7M19 5l-2 2" /></>)}
+        </svg>
+      </button>
+    ))}
+
+    <div class="lt-oscuridad" aria-hidden="true"></div>
+    <p class="escenario-msg" data-msg aria-live="polite">Mové el cursor para alumbrar. Algo tiene que haber.</p>
+  </div>
+</ErrorPage>
+
+<style>
+  .linterna {
+    --lx: 50%;
+    --ly: 45%;
+    --radio: 115px;
+    cursor: none;
+    touch-action: none;
+    background:
+      radial-gradient(circle at 50% 120%, rgb(84 113 255 / .35), transparent 60%),
+      var(--navy);
+  }
+
+  .lt-codigo {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: clamp(120px, 26vw, 230px);
+    color: rgb(255 255 255 / .1);
+    -webkit-text-stroke: 2px rgb(255 255 255 / .35);
+    pointer-events: none;
+  }
+
+  .lt-cosa {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    translate: -50% -50%;
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    padding: 0;
+    border: 1.5px dashed rgb(255 255 255 / .55);
+    border-radius: 50%;
+    background: rgb(255 255 255 / .1);
+    color: #fff;
+    cursor: inherit;
+    transition: scale .3s var(--ease-rv), background-color .3s;
+  }
+  .lt-cosa:hover, .lt-cosa:focus-visible { scale: 1.12; background: rgb(255 255 255 / .2); }
+  .lt-cosa.visto { border-style: solid; border-color: var(--green); color: var(--green); }
+
+  /* La oscuridad tiene un agujero en la posición de la linterna. */
+  .lt-oscuridad {
+    position: absolute;
+    inset: 0;
+    background: #07022e;
+    pointer-events: none;
+    -webkit-mask: radial-gradient(circle var(--radio) at var(--lx) var(--ly), transparent 55%, #000 100%);
+            mask: radial-gradient(circle var(--radio) at var(--lx) var(--ly), transparent 55%, #000 100%);
+  }
+  .lt-oscuridad::after {
+    /* Halo cálido de la linterna. */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle var(--radio) at var(--lx) var(--ly), rgb(255 199 40 / .12), transparent 70%);
+  }
+</style>
+
+<script>
+  const esc = document.querySelector<HTMLElement>("[data-linterna]")!;
+  const msg = esc.querySelector<HTMLElement>("[data-msg]")!;
+  const cosas = [...esc.querySelectorAll<HTMLButtonElement>(".lt-cosa")];
+  const vistos = new Set<HTMLButtonElement>();
+  const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let tocado = false;
+  const mover = (x: number, y: number) => {
+    esc.style.setProperty("--lx", `${x}px`);
+    esc.style.setProperty("--ly", `${y}px`);
+  };
+
+  esc.addEventListener("pointermove", (e) => {
+    tocado = true;
+    const r = esc.getBoundingClientRect();
+    mover(e.clientX - r.left, e.clientY - r.top);
+  });
+
+  // Con teclado: la linterna salta a lo que tiene el foco.
+  cosas.forEach((b) => b.addEventListener("focus", () => {
+    tocado = true;
+    mover(b.offsetLeft, b.offsetTop);
+  }));
+
+  cosas.forEach((b) => b.addEventListener("click", () => {
+    vistos.add(b);
+    b.classList.add("visto");
+    const faltan = cosas.length - vistos.size;
+    msg.textContent = faltan
+      ? `${b.dataset.texto}`
+      : "Revisaste todo y la página no está. Oficialmente perdida. Volvé al inicio.";
+  }));
+
+  // Antes de que el visitante la agarre, la linterna busca sola.
+  if (!quieto) {
+    const t0 = performance.now();
+    const ronda = (t: number) => {
+      if (tocado) return;
+      const s = (t - t0) / 1000;
+      const r = esc.getBoundingClientRect();
+      mover(r.width * (0.5 + 0.36 * Math.sin(s * 0.7)), r.height * (0.45 + 0.25 * Math.sin(s * 1.3)));
+      requestAnimationFrame(ronda);
+    };
+    requestAnimationFrame(ronda);
+  } else {
+    esc.style.setProperty("--radio", "2000px");
+  }
+</script>

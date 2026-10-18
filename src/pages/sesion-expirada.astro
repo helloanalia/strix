@@ -1,0 +1,185 @@
+---
+// Sesión expirada — Figma 376:15740 (badge "Cerrado").
+// Escenario: el cartel de la puerta del local, colgado de un clavo. Se mece;
+// tocándolo se da vuelta y pasa a "Abierto".
+import ErrorPage from "../components/ErrorPage.astro";
+---
+
+<ErrorPage
+  titulo="Sesión expirada."
+  texto="Por seguridad, cerramos tu sesión tras un rato de inactividad. Ingresá de nuevo y te llevamos a donde estabas para que sigas gestionando tus recompensas sin perder el ritmo."
+  icono="tienda"
+  badge="Cerrado"
+>
+  <div class="escenario cartel" data-cartel>
+    <span class="ct-zzz" aria-hidden="true"><i>z</i><i>z</i><i>z</i></span>
+
+    <div class="ct-colgante" data-colgante>
+      <span class="ct-clavo" aria-hidden="true"></span>
+      <svg class="ct-hilo" viewBox="0 0 200 60" aria-hidden="true">
+        <path d="M100 4 30 58M100 4l70 54" stroke="#c0d5ff" stroke-width="2" fill="none" />
+      </svg>
+      <button class="ct-placa" type="button" data-placa aria-pressed="false" aria-label="Dar vuelta el cartel">
+        <span class="ct-cara ct-cerrado">
+          <b>Cerrado</b>
+          <small>Volvemos cuando ingreses</small>
+        </span>
+        <span class="ct-cara ct-abierto">
+          <b>Abierto</b>
+          <small>¡Bienvenido de vuelta!</small>
+        </span>
+      </button>
+    </div>
+
+    <p class="escenario-msg" data-msg aria-live="polite">Te fuiste un rato y cerramos el local. Tocá el cartel.</p>
+  </div>
+</ErrorPage>
+
+<style>
+  .cartel {
+    background:
+      linear-gradient(transparent 70%, rgb(0 0 0 / .18) 70%),
+      repeating-linear-gradient(90deg, rgb(255 255 255 / .035) 0 2px, transparent 2px 64px),
+      var(--navy);
+    perspective: 900px;
+  }
+
+  .ct-colgante {
+    position: absolute;
+    left: 50%;
+    top: 18px;
+    width: min(300px, 70%);
+    translate: -50% 0;
+    transform-origin: 50% 6px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ct-colgante { animation: ct-mece 4.5s ease-in-out infinite; }
+    .ct-colgante.empujon { animation: ct-empujon 1.6s ease-out; }
+  }
+  @keyframes ct-mece {
+    0%, 100% { rotate: -2.5deg; }
+    50% { rotate: 2.5deg; }
+  }
+  @keyframes ct-empujon {
+    0% { rotate: 0deg; }
+    15% { rotate: 14deg; }
+    35% { rotate: -10deg; }
+    55% { rotate: 6deg; }
+    75% { rotate: -3deg; }
+    100% { rotate: 0deg; }
+  }
+
+  .ct-clavo {
+    position: absolute;
+    left: 50%; top: 0;
+    width: 12px; height: 12px;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff, #9ca3af);
+    z-index: 2;
+  }
+  .ct-hilo { display: block; width: 100%; height: auto; margin-bottom: -6px; overflow: visible; }
+
+  .ct-placa {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 2.1;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: rotate .8s cubic-bezier(.34, 1.4, .64, 1);
+  }
+  .ct-placa[aria-pressed="true"] { rotate: y 180deg; }
+
+  .ct-cara {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    gap: 4px;
+    border-radius: 14px;
+    border: 4px solid #fff;
+    box-shadow: 0 18px 34px rgb(6 2 40 / .5);
+    backface-visibility: hidden;
+    color: #fff;
+    text-align: center;
+  }
+  .ct-cara b {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(30px, 6vw, 46px);
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+  .ct-cara small {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    opacity: .85;
+  }
+  .ct-cerrado { background: var(--red-600); }
+  .ct-abierto { background: var(--green-600); rotate: y 180deg; }
+
+  /* Zzz que suben desde el costado: el local está durmiendo. */
+  .ct-zzz {
+    position: absolute;
+    right: 16%;
+    top: 26%;
+    font-family: var(--font-display);
+    font-weight: 900;
+    color: var(--indigo-light);
+    transition: opacity .4s;
+  }
+  .ct-zzz i { position: absolute; font-style: normal; opacity: 0; }
+  .ct-zzz i:nth-child(1) { font-size: 18px; }
+  .ct-zzz i:nth-child(2) { font-size: 26px; animation-delay: .9s; }
+  .ct-zzz i:nth-child(3) { font-size: 34px; animation-delay: 1.8s; }
+  @media (prefers-reduced-motion: no-preference) {
+    .ct-zzz i { animation: ct-zzz 2.7s ease-out infinite; }
+    .ct-zzz i:nth-child(2) { animation-delay: .9s; }
+    .ct-zzz i:nth-child(3) { animation-delay: 1.8s; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ct-zzz i { opacity: .6; position: static; } }
+  @keyframes ct-zzz {
+    0% { opacity: 0; translate: 0 20px; }
+    30% { opacity: 1; }
+    100% { opacity: 0; translate: 34px -60px; }
+  }
+  .cartel.abierto .ct-zzz { opacity: 0; }
+</style>
+
+<script>
+  const esc = document.querySelector<HTMLElement>("[data-cartel]")!;
+  const colgante = esc.querySelector<HTMLElement>("[data-colgante]")!;
+  const placa = esc.querySelector<HTMLButtonElement>("[data-placa]")!;
+  const msg = esc.querySelector<HTMLElement>("[data-msg]")!;
+  let vueltas = 0;
+
+  placa.addEventListener("click", () => {
+    vueltas++;
+    const abierto = placa.getAttribute("aria-pressed") !== "true";
+    placa.setAttribute("aria-pressed", String(abierto));
+    esc.classList.toggle("abierto", abierto);
+
+    colgante.classList.remove("empujon");
+    void colgante.offsetWidth;
+    colgante.classList.add("empujon");
+
+    if (vueltas > 5) {
+      msg.textContent = "El cartel ya está mareado. Ingresá de nuevo y abrimos de verdad.";
+    } else {
+      msg.textContent = abierto
+        ? "¡Abierto! Bueno, casi: falta que ingreses de nuevo."
+        : "Cerrado otra vez. El cartel es más rápido que vos.";
+    }
+  });
+
+  // Al terminar el empujón vuelve a mecerse solo.
+  colgante.addEventListener("animationend", (e) => {
+    if (e.animationName.includes("empujon")) colgante.classList.remove("empujon");
+  });
+</script>
