@@ -1,0 +1,198 @@
+---
+// Error 404 — Figma Strix APP › System › Errores/01-404.
+// Misma estructura que sesión expirada (layout de login). En el panel índigo,
+// una tarjeta de sellos con el 4, el 0 y el 4 sellados y el último casillero
+// vacío. La lupa sigue al cursor sobre los sellos; tocar el casillero vacío
+// lo revisa y cambia la pista.
+import LoginShell from "../components/errores/LoginShell.astro";
+import { ruta } from "../lib/ruta";
+
+const sueltos = [
+  { x: 8, y: 6, s: 44, o: 0.7 }, { x: 82, y: 12, s: 56, o: 0.55 },
+  { x: 80, y: 82, s: 36, o: 0.7 }, { x: 4, y: 80, s: 60, o: 0.5 },
+];
+---
+
+<LoginShell
+  titulo="Error 404 — Página no encontrada"
+  descripcion="Buscamos por todas partes, pero el reporte, perfil o configuración que intentás ver ya no está disponible."
+  bajada="Buscamos por todos lados. No está."
+>
+  <div slot="panel" class="escena">
+    {sueltos.map((s) => (
+      <span class="suelto" aria-hidden="true"
+        style={`left:${s.x}%; top:${s.y}%; width:${s.s}px; --o:${s.o}`}></span>
+    ))}
+
+    <div class="tarjeta" data-tarjeta>
+      <div class="cabeza">
+        <img src={ruta("/img/logo-strix.svg")} alt="" width="60" height="24" />
+        <span>Tarjeta de páginas · 3/4</span>
+      </div>
+      <div class="sellos" data-sellos>
+        <span class="sello" style="--r:-6deg" aria-hidden="true">4</span>
+        <span class="sello" style="--r:4deg" aria-hidden="true">0</span>
+        <span class="sello" style="--r:-3deg" aria-hidden="true">4</span>
+        <button class="sello vacio" type="button" data-vacio aria-label="Revisar el casillero vacío">?</button>
+        <svg class="lupa" data-lupa viewBox="0 0 24 24" width="80" height="80" fill="none" aria-hidden="true">
+          <circle cx="10" cy="10" r="6.5" stroke="#fff" stroke-width="1.8" />
+          <path d="m15 15 6 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <span class="badge badge-blue">Error 404 · Página no encontrada</span>
+  <h1 class="p-title">Esta página no tiene sello.</h1>
+  <p class="p-text">Buscamos por todas partes, pero el reporte, perfil o configuración que intentás ver ya no está disponible. Volvé al panel principal para seguir analizando el movimiento de tu local.</p>
+  <div class="p-acciones">
+    <a class="btn btn-solid-blue" href={ruta("/")}>Volver al inicio</a>
+    <a class="btn btn-ghost-blue" href={ruta("/")} data-atras>Volver atrás</a>
+  </div>
+  <p class="p-hint" data-pista aria-live="polite">Pista: tampoco está debajo del felpudo. Ya nos fijamos.</p>
+</LoginShell>
+
+<style>
+  .escena { position: absolute; inset: 0; display: grid; place-items: center; }
+
+  /* Sellos sueltos alrededor de la tarjeta. */
+  .suelto {
+    position: absolute;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: rgb(255 255 255 / .08);
+    border: 1.5px dashed rgb(192 213 255 / var(--o));
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .suelto { animation: flota 7s ease-in-out infinite; }
+    .suelto:nth-child(2n) { animation-duration: 9s; animation-delay: -3s; }
+  }
+  @keyframes flota { 50% { translate: 0 -10px; } }
+
+  .tarjeta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 24px 24px;
+    border-radius: 20px;
+    background: rgb(255 255 255 / .12);
+    border: 1px solid rgb(255 255 255 / .25);
+    box-shadow: 0 18px 36px rgb(22 7 106 / .25);
+  }
+  .cabeza {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgb(255 255 255 / .8);
+  }
+  .cabeza img { width: 60px; height: auto; }
+
+  .sellos { position: relative; display: flex; gap: 12px; }
+  .sello {
+    display: grid;
+    place-items: center;
+    width: clamp(56px, 15vw, 80px);
+    aspect-ratio: 1;
+    padding: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 6px 14px rgb(22 7 106 / .18);
+    font-size: clamp(28px, 7vw, 38px);
+    font-weight: 800;
+    color: var(--indigo);
+    rotate: var(--r, 0deg);
+    transition: rotate .4s cubic-bezier(.34, 1.56, .64, 1), scale .3s var(--ease-rv);
+  }
+  .sello:not(.vacio):hover { rotate: calc(var(--r) * -1.6); scale: 1.06; }
+  .vacio {
+    border: 2px dashed rgb(255 255 255 / .7);
+    background: rgb(255 255 255 / .1);
+    box-shadow: none;
+    color: rgb(255 255 255 / .75);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .vacio.revisa { animation: revisa .5s ease-in-out; }
+  @keyframes revisa {
+    0%, 100% { rotate: 0deg; }
+    25% { rotate: -12deg; }
+    50% { rotate: 10deg; }
+    75% { rotate: -5deg; }
+  }
+
+  .lupa {
+    position: absolute;
+    left: 0; top: 0;
+    width: clamp(56px, 14vw, 80px);
+    height: auto;
+    pointer-events: none;
+    translate: var(--lx, 0) var(--ly, 0);
+    rotate: -10deg;
+    transition: translate .45s var(--ease-rv);
+    filter: drop-shadow(0 6px 10px rgb(22 7 106 / .3));
+  }
+  .lupa.sigue { transition-duration: .12s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vacio.revisa { animation: none; }
+    .lupa { transition: none; }
+  }
+  @media (max-width: 640px) {
+    .tarjeta { padding: 16px; }
+    .sellos { gap: 8px; }
+  }
+</style>
+
+<script>
+  import { ruta } from "../lib/ruta";
+
+  const tarjeta = document.querySelector<HTMLElement>("[data-tarjeta]")!;
+  const sellos = tarjeta.querySelector<HTMLElement>("[data-sellos]")!;
+  const vacio = tarjeta.querySelector<HTMLButtonElement>("[data-vacio]")!;
+  const lupa = tarjeta.querySelector<SVGElement>("[data-lupa]")!;
+  const pista = document.querySelector<HTMLElement>("[data-pista]")!;
+
+  // La lupa descansa sobre el casillero vacío...
+  const reposo = () => {
+    lupa.classList.remove("sigue");
+    lupa.style.setProperty("--lx", `${vacio.offsetLeft + vacio.offsetWidth * 0.3}px`);
+    lupa.style.setProperty("--ly", `${vacio.offsetTop + vacio.offsetHeight * 0.05}px`);
+  };
+  reposo();
+  window.addEventListener("resize", reposo);
+
+  // ...y sigue al cursor cuando pasa por los sellos.
+  if (window.matchMedia("(hover: hover) and (prefers-reduced-motion: no-preference)").matches) {
+    sellos.addEventListener("pointermove", (e) => {
+      const r = sellos.getBoundingClientRect();
+      lupa.classList.add("sigue");
+      lupa.style.setProperty("--lx", `${e.clientX - r.left - lupa.clientWidth * 0.42}px`);
+      lupa.style.setProperty("--ly", `${e.clientY - r.top - lupa.clientWidth * 0.42}px`);
+    });
+    sellos.addEventListener("pointerleave", reposo);
+  }
+
+  const pistas = [
+    "Revisado: vacío. Como la heladera un domingo.",
+    "Tampoco está abajo de los sellos. Levantamos todos.",
+    "Le preguntamos al búho. Dice que él no la tiene.",
+    "Probamos con sellos dobles. Nada.",
+    "Ok, aceptamos la derrota. Volvé al inicio.",
+  ];
+  let n = 0;
+  vacio.addEventListener("click", () => {
+    vacio.classList.remove("revisa");
+    void vacio.offsetWidth;
+    vacio.classList.add("revisa");
+    pista.textContent = pistas[Math.min(n++, pistas.length - 1)];
+  });
+
+  document.querySelector<HTMLAnchorElement>("[data-atras]")!.addEventListener("click", (e) => {
+    if (history.length > 1) { e.preventDefault(); history.back(); }
+    else (e.currentTarget as HTMLAnchorElement).href = ruta("/");
+  });
+</script>

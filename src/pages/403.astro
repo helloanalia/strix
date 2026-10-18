@@ -1,0 +1,179 @@
+---
+// Error 403 — Figma Strix APP › System › Errores/02-403.
+// Un pase con talón: el candado vive en el talón y el texto en el cuerpo.
+// Tocar el candado lo sacude y el sello "Sin acceso" vuelve a golpear.
+import PanelShell from "../components/errores/PanelShell.astro";
+import { ruta } from "../lib/ruta";
+---
+
+<PanelShell
+  titulo="Error 403 — Acceso denegado"
+  descripcion="Tu usuario no tiene los permisos necesarios para ver estas configuraciones o analíticas."
+>
+  <div class="comp">
+    <article class="pase p-card" data-pase data-reveal="scale">
+      <div class="talon">
+        <button class="candado" type="button" data-candado aria-label="Intentar abrir el candado">
+          <svg viewBox="0 0 120 140" width="96" height="112" fill="none" aria-hidden="true">
+            <path class="arco" d="M30 64V42a30 30 0 0 1 60 0v22" stroke="#c0d5ff" stroke-width="12" stroke-linecap="round" />
+            <rect x="10" y="60" width="100" height="76" rx="16" fill="#5471ff" />
+            <circle cx="60" cy="92" r="10" fill="#fff" />
+            <path d="M55 98h10l-2 18h-6Z" fill="#fff" />
+          </svg>
+        </button>
+        <p class="p-over solo">Solo admin</p>
+        <p class="p-hint">Tu nivel: Equipo</p>
+      </div>
+
+      <div class="cuerpo">
+        <span class="badge badge-red">Error 403 · Acceso denegado</span>
+        <h1 class="p-title">Este pase no abre esta puerta.</h1>
+        <p class="p-text">Tu usuario no tiene los permisos necesarios para ver estas configuraciones o analíticas. Pedile al administrador de tu negocio que revise tus niveles de acceso.</p>
+        <div class="p-acciones">
+          <a class="btn btn-solid-blue" href={ruta("/")}>Volver al inicio</a>
+          <a class="btn btn-white-gray" href={ruta("/")}>Pedir acceso al admin</a>
+        </div>
+      </div>
+
+      <span class="sello" data-sello aria-hidden="true">Sin acceso</span>
+    </article>
+
+    <p class="p-hint pista" data-pista aria-live="polite">El candado no acepta sellos dobles. Ya probamos.</p>
+  </div>
+</PanelShell>
+
+<style>
+  .comp {
+    width: min(760px, 100%);
+    display: grid;
+    justify-items: center;
+    gap: 28px;
+  }
+
+  .pase {
+    position: relative;
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    width: 100%;
+    border-radius: 20px;
+  }
+
+  .talon {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 36px 28px;
+    background: var(--soft);
+    border-radius: 20px 0 0 20px;
+    border-right: 2px dashed rgb(84 113 255 / .35);
+    text-align: center;
+  }
+  /* Muescas del troquel, del color del fondo de la página. */
+  .talon::before, .talon::after {
+    content: "";
+    position: absolute;
+    right: -15px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+  .talon::before { top: -15px; }
+  .talon::after { bottom: -15px; }
+  .solo { color: var(--indigo); }
+
+  .candado { padding: 0; border: 0; background: none; cursor: pointer; transition: scale .2s var(--ease-rv); }
+  .candado:hover { scale: 1.06; }
+  .candado:active { scale: .95; }
+  .candado svg { overflow: visible; }
+  .candado.sacude { animation: sacude .45s ease-in-out; }
+  .candado.sacude .arco { animation: arco .45s ease-in-out; }
+  @keyframes sacude {
+    0%, 100% { rotate: 0deg; }
+    20% { rotate: -10deg; }
+    40% { rotate: 8deg; }
+    60% { rotate: -5deg; }
+    80% { rotate: 3deg; }
+  }
+  @keyframes arco {
+    0%, 100% { translate: 0 0; }
+    35% { translate: 0 -8px; }
+    55% { translate: 0 0; }
+  }
+
+  .cuerpo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 36px 40px;
+  }
+
+  /* Sello de goma, encima de la esquina del pase. */
+  .sello {
+    position: absolute;
+    top: -22px; right: -18px;
+    padding: 8px 16px;
+    border: 3px solid var(--red-600);
+    border-radius: var(--r-lg);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--red-600);
+    opacity: .85;
+    rotate: 12deg;
+    pointer-events: none;
+  }
+  .sello.golpe { animation: golpe .4s cubic-bezier(.34, 1.56, .64, 1); }
+  @keyframes golpe {
+    0% { scale: 1.6; opacity: 0; }
+    100% { scale: 1; opacity: .85; }
+  }
+
+  .pista { text-align: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .candado.sacude, .candado.sacude .arco, .sello.golpe { animation: none; }
+  }
+  @media (max-width: 700px) {
+    .pase { grid-template-columns: 1fr; }
+    .talon { border-radius: 20px 20px 0 0; border-right: 0; border-bottom: 2px dashed rgb(84 113 255 / .35); flex-direction: row; flex-wrap: wrap; padding: 24px; }
+    .talon::before, .talon::after { top: auto; bottom: -15px; right: auto; }
+    .talon::before { left: -15px; }
+    .talon::after { right: -15px; }
+    .candado svg { width: 64px; height: auto; }
+    .cuerpo { padding: 28px 24px; }
+    .sello { right: 8px; top: -18px; font-size: 18px; }
+  }
+</style>
+
+<script>
+  const pase = document.querySelector<HTMLElement>("[data-pase]")!;
+  const candado = pase.querySelector<HTMLButtonElement>("[data-candado]")!;
+  const sello = pase.querySelector<HTMLElement>("[data-sello]")!;
+  const pista = document.querySelector<HTMLElement>("[data-pista]")!;
+
+  const frases = [
+    "Nop. Sigue cerrado.",
+    "Probaste con más fuerza. Sigue cerrado.",
+    "Ni con sellos dobles abre.",
+    "Este candado no se deja convencer.",
+    "En serio: la llave la tiene el admin de tu negocio.",
+    "El candado te pide que dejes de tocarlo.",
+  ];
+  let n = 0;
+
+  const reinicia = (el: Element, clase: string) => {
+    el.classList.remove(clase);
+    void (el as HTMLElement).offsetWidth;
+    el.classList.add(clase);
+  };
+
+  candado.addEventListener("click", () => {
+    pista.textContent = frases[Math.min(n++, frases.length - 1)];
+    reinicia(candado, "sacude");
+    reinicia(sello, "golpe");
+  });
+</script>

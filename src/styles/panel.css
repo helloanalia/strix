@@ -1,0 +1,96 @@
+/* ==========================================================================
+   Estilos del panel (plataforma) para las páginas de error.
+   Salen de la página "Local" del Figma Strix APP y del DLS: fondo gris
+   claro, tarjetas blancas, Plus Jakarta Sans y los botones y badges del DLS.
+   No usan el look del sitio web (índigo oscuro, glows, Poppins).
+   ========================================================================== */
+
+.panel {
+  --soft: #eef1ff;          /* Strix/Brand/Indigo-Soft */
+  --light: #c0d5ff;         /* Strix/Brand/Indigo-100-Light */
+  --amber: #ffc728;         /* Strix/Brand/Amber: solo acento decorativo */
+
+  min-height: 100svh;
+  background: var(--surface);
+  color: var(--fg);
+  font-family: var(--font-body);
+  letter-spacing: 0;
+}
+
+/* --- texto: estilos del DLS --- */
+.p-title {               /* 2XL/Bold */
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  color: var(--fg);
+  text-wrap: balance;
+}
+.p-text {                /* Base/Regular */
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.p-hint {                /* SM/Regular */
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--muted);
+}
+.p-over {                /* Overline/Bold */
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* --- tarjeta --- */
+.p-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgb(30 33 38 / .08);
+}
+
+.p-acciones { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+/* --- badge (DLS: Type=Soft, Shape=Rounded) --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.badge-red    { background: #fee2e2; color: #991b1b; }
+.badge-yellow { background: #fef3c7; color: #92400e; }
+.badge-gray   { background: #f3f4f6; color: #374151; }
+.badge-green  { background: #dcfce7; color: #166534; }
+.badge-blue   { background: var(--soft); color: var(--indigo); }
+.badge-light  { background: rgb(255 255 255 / .18); color: #fff; }
+
+/* --- botones del DLS que faltan en global.css --- */
+.btn-solid-blue { background: var(--indigo); color: #fff; }
+.btn-solid-blue:hover { background: var(--indigo-hover); }
+.btn-white-gray {
+  background: #fff;
+  border-color: var(--border);
+  color: var(--fg);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .05);
+}
+.btn-white-gray:hover { background: #f9fafb; }
+.btn-ghost-blue { background: transparent; color: var(--indigo); }
+.btn-ghost-blue:hover { background: var(--soft); }
+.btn-link-light { background: transparent; color: #fff; }
+.btn-link-light:hover { background: rgb(255 255 255 / .12); }

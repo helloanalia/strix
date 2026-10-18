@@ -1,0 +1,162 @@
+---
+// Sesión expirada — Figma Strix APP › System › Errores/05-sesion-expirada.
+// Layout de login: en el panel índigo cuelga el cartel de "Cerrado", que se
+// mece y se da vuelta al tocarlo.
+import LoginShell from "../components/errores/LoginShell.astro";
+import { ruta } from "../lib/ruta";
+---
+
+<LoginShell
+  titulo="Sesión expirada"
+  descripcion="Por seguridad, cerramos tu sesión tras un rato de inactividad."
+  bajada="Mientras no estabas, cerramos el local."
+>
+  <div slot="panel" class="escena" data-escena>
+    <svg class="luna" viewBox="0 0 24 24" width="56" height="56" aria-hidden="true">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="#c0d5ff" />
+    </svg>
+    <span class="zzz" aria-hidden="true"><i>z</i><i>z</i><i>z</i></span>
+
+    <div class="colgante" data-colgante>
+      <span class="clavo" aria-hidden="true"></span>
+      <svg class="hilo" viewBox="0 0 280 70" fill="none" aria-hidden="true">
+        <path d="M140 8 20 68M140 8l120 60" stroke="#c0d5ff" stroke-width="2.5" />
+      </svg>
+      <button class="placa" type="button" data-placa aria-pressed="false" aria-label="Dar vuelta el cartel">
+        <span class="cara cerrado"><b>Cerrado</b><small>Volvemos cuando ingreses</small></span>
+        <span class="cara abierto"><b>Abierto</b><small>¡Bienvenido de vuelta!</small></span>
+      </button>
+    </div>
+  </div>
+
+  <span class="badge badge-gray">Sesión expirada</span>
+  <h1 class="p-title">Te fuiste un ratito y cerramos.</h1>
+  <p class="p-text">Por seguridad, cerramos tu sesión tras un rato de inactividad. Ingresá de nuevo y te llevamos a donde estabas para que sigas gestionando tus recompensas sin perder el ritmo.</p>
+  <div class="p-acciones">
+    <a class="btn btn-solid-blue" href={ruta("/")}>Ingresar de nuevo</a>
+    <a class="btn btn-ghost-blue" href={ruta("/")}>Volver al inicio</a>
+  </div>
+  <p class="p-hint" data-pista aria-live="polite">Tus sellos, campañas y clientes quedaron guardados bajo llave.</p>
+</LoginShell>
+
+<style>
+  .escena { position: absolute; inset: 0; perspective: 900px; }
+
+  .luna { position: absolute; right: 0; top: 0; }
+
+  .zzz { position: absolute; right: 24px; top: 46%; font-weight: 800; color: var(--light); transition: opacity .4s; }
+  .zzz i { position: absolute; font-style: normal; opacity: 0; }
+  .zzz i:nth-child(1) { font-size: 20px; }
+  .zzz i:nth-child(2) { font-size: 28px; }
+  .zzz i:nth-child(3) { font-size: 38px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .zzz i { animation: zzz 2.7s ease-out infinite; }
+    .zzz i:nth-child(2) { animation-delay: .9s; }
+    .zzz i:nth-child(3) { animation-delay: 1.8s; }
+  }
+  @media (prefers-reduced-motion: reduce) { .zzz i { position: static; opacity: .7; } }
+  @keyframes zzz {
+    0% { opacity: 0; translate: 0 20px; }
+    30% { opacity: 1; }
+    100% { opacity: 0; translate: 30px -60px; }
+  }
+  .escena.abierto .zzz { opacity: 0; }
+
+  .colgante {
+    position: absolute;
+    left: 50%; top: 24px;
+    width: min(300px, 80%);
+    translate: -50% 0;
+    transform-origin: 50% 8px;
+    rotate: -4deg;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .colgante { animation: mece 4.5s ease-in-out infinite; }
+    .colgante.empujon { animation: empujon 1.6s ease-out; }
+  }
+  @keyframes mece { 0%, 100% { rotate: -4deg; } 50% { rotate: 2deg; } }
+  @keyframes empujon {
+    15% { rotate: 14deg; }
+    35% { rotate: -10deg; }
+    55% { rotate: 6deg; }
+    75% { rotate: -3deg; }
+    100% { rotate: 0deg; }
+  }
+  .clavo {
+    position: absolute;
+    left: 50%; top: 0;
+    width: 14px; height: 14px;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 4px rgb(22 7 106 / .4);
+    z-index: 1;
+  }
+  .hilo { display: block; width: 93%; margin: 0 auto -8px; height: auto; }
+
+  .placa {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 300 / 140;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: rotate .8s cubic-bezier(.34, 1.4, .64, 1);
+  }
+  .placa[aria-pressed="true"] { rotate: y 180deg; }
+  .cara {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    gap: 6px;
+    border-radius: 16px;
+    background: #fff;
+    border: 6px solid var(--red-600);
+    box-shadow: 0 18px 30px rgb(22 7 106 / .35);
+    backface-visibility: hidden;
+    text-align: center;
+  }
+  .cara b {
+    font-size: clamp(32px, 4.4vw, 48px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    color: var(--red-600);
+  }
+  .cara small { font-size: 14px; color: var(--muted); }
+  .abierto { border-color: var(--green-600); rotate: y 180deg; }
+  .abierto b { color: var(--green-600); }
+</style>
+
+<script>
+  const escena = document.querySelector<HTMLElement>("[data-escena]")!;
+  const colgante = escena.querySelector<HTMLElement>("[data-colgante]")!;
+  const placa = escena.querySelector<HTMLButtonElement>("[data-placa]")!;
+  const pista = document.querySelector<HTMLElement>("[data-pista]")!;
+  let vueltas = 0;
+
+  placa.addEventListener("click", () => {
+    vueltas++;
+    const abierto = placa.getAttribute("aria-pressed") !== "true";
+    placa.setAttribute("aria-pressed", String(abierto));
+    escena.classList.toggle("abierto", abierto);
+
+    colgante.classList.remove("empujon");
+    void colgante.offsetWidth;
+    colgante.classList.add("empujon");
+
+    pista.textContent = vueltas > 5
+      ? "El cartel ya está mareado. Ingresá de nuevo y abrimos de verdad."
+      : abierto
+        ? "¡Abierto! Bueno, casi: falta que ingreses de nuevo."
+        : "Cerrado otra vez. El cartel es más rápido que vos.";
+  });
+  colgante.addEventListener("animationend", (e) => {
+    if (e.animationName.includes("empujon")) colgante.classList.remove("empujon");
+  });
+</script>

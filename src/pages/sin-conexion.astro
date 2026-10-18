@@ -1,0 +1,193 @@
+---
+// Sin conexión — Figma Strix APP › System › Errores/04-sin-conexion.
+// Una tarjeta con el enchufe suelto arriba. Tocar la ficha intenta
+// enchufarla: sin red rebota, con red engancha. El badge sigue el estado
+// real de la conexión.
+import PanelShell from "../components/errores/PanelShell.astro";
+import { ruta } from "../lib/ruta";
+---
+
+<PanelShell
+  titulo="Sin conexión a la red"
+  descripcion="Parece que te quedaste sin internet. Revisá tu red para seguir viendo tus estadísticas."
+>
+  <article class="tarjeta p-card" data-tarjeta data-reveal="scale">
+    <div class="enchufe" data-enchufe>
+      <button class="ficha" type="button" data-ficha aria-label="Intentar enchufar">
+        <svg viewBox="0 0 220 80" width="220" height="80" fill="none" aria-hidden="true">
+          <path d="M-400 40H120" stroke="#1e2126" stroke-width="6" stroke-linecap="round" />
+          <rect x="118" y="16" width="60" height="48" rx="12" fill="#5471ff" />
+          <rect x="130" y="30" width="20" height="4" rx="2" fill="rgb(255 255 255 / .6)" />
+          <rect x="178" y="25" width="26" height="7" rx="3.5" fill="#1e2126" />
+          <rect x="178" y="48" width="26" height="7" rx="3.5" fill="#1e2126" />
+        </svg>
+      </button>
+      <svg class="chispas" viewBox="0 0 64 64" width="56" height="56" fill="none" aria-hidden="true">
+        <path d="M32 6v12M32 46v12M8 32h12M44 32h12M15 15l8 8M41 41l8 8M49 15l-8 8M23 41l-8 8" stroke="#ffc728" stroke-width="3" stroke-linecap="round" />
+      </svg>
+      <svg class="toma" viewBox="0 0 220 80" width="220" height="80" fill="none" aria-hidden="true">
+        <path d="M100 40h520" stroke="#1e2126" stroke-width="6" stroke-linecap="round" />
+        <rect class="toma-cuerpo" x="36" y="12" width="66" height="56" rx="14" fill="#c0d5ff" />
+        <rect x="44" y="25" width="12" height="7" rx="3.5" fill="#1e2126" />
+        <rect x="44" y="48" width="12" height="7" rx="3.5" fill="#1e2126" />
+      </svg>
+    </div>
+
+    <span class="badge badge-red" data-estado aria-live="polite">Sin conexión</span>
+    <h1 class="p-title">Se desenchufó internet.</h1>
+    <p class="p-text">Parece que te quedaste sin internet. Revisá tu red para seguir viendo tus estadísticas y registrando las visitas de tus clientes en tiempo real.</p>
+
+    <div class="espera" aria-hidden="true">
+      <p class="p-over">Tus estadísticas</p>
+      {[220, 160, 260].map((w, i) => (
+        <div class="fila" style={`--o:${[1, .7, .45][i]}`}>
+          <span class="av"></span>
+          <span class="dato" style={`width:${w}px`}></span>
+          <span class="p-hint">Esperando red…</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="pie">
+      <a class="btn btn-solid-blue" href={ruta("/")} data-reintentar>Reintentar</a>
+      <p class="p-hint" data-pista aria-live="polite">Probá apagar y prender el router. Funciona casi siempre.</p>
+    </div>
+  </article>
+</PanelShell>
+
+<style>
+  .tarjeta {
+    width: min(640px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 32px;
+  }
+
+  .enchufe {
+    position: relative;
+    align-self: stretch;
+    height: 140px;
+    border-radius: 12px;
+    background: rgb(238 241 255 / .6);
+    overflow: hidden;
+  }
+  .ficha {
+    position: absolute;
+    left: -10px; top: 30px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    rotate: 4deg;
+    transition: translate .35s var(--ease-rv), rotate .35s var(--ease-rv);
+  }
+  .ficha svg, .toma { overflow: visible; display: block; }
+  .ficha:hover { translate: 8px 0; }
+  .toma { position: absolute; right: -10px; top: 30px; }
+  .chispas { position: absolute; left: 50%; top: 42px; translate: -50% 0; transition: opacity .3s; }
+  @media (prefers-reduced-motion: no-preference) {
+    .chispas { animation: chisporrotea 1.2s steps(2) infinite; }
+  }
+  @keyframes chisporrotea { 50% { scale: .7; opacity: .5; } }
+
+  /* Intento sin red: avanza y rebota. */
+  .ficha.rebota { animation: rebota .6s var(--ease-rv); }
+  @keyframes rebota {
+    45% { translate: var(--hasta) 0; rotate: 0deg; }
+    60% { translate: calc(var(--hasta) - 30px) 0; rotate: 8deg; }
+    100% { translate: 0 0; rotate: 4deg; }
+  }
+  /* Con red: queda enchufada. */
+  .enchufe.conectado .ficha { translate: var(--hasta) 0; rotate: 0deg; }
+  .enchufe.conectado .chispas { opacity: 0; }
+  .enchufe.conectado .toma-cuerpo { fill: #91d229; transition: fill .3s; }
+
+  .espera {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+  }
+  .fila { display: flex; align-items: center; gap: 12px; opacity: var(--o); }
+  .fila .p-hint { margin-left: auto; white-space: nowrap; }
+  .av { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--neutral); }
+  .dato {
+    max-width: 50%;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, var(--neutral) 40%, #ececec 50%, var(--neutral) 60%) 0 0 / 300% 100%;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .dato { animation: brillo 1.8s linear infinite; }
+  }
+  @keyframes brillo { to { background-position: -150% 0; } }
+
+  .pie { align-self: stretch; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+  @media (max-width: 640px) {
+    .tarjeta { padding: 24px 20px; }
+    .ficha svg, .toma { width: 160px; height: auto; }
+  }
+</style>
+
+<script>
+  const enchufe = document.querySelector<HTMLElement>("[data-enchufe]")!;
+  const ficha = enchufe.querySelector<HTMLButtonElement>("[data-ficha]")!;
+  const estado = document.querySelector<HTMLElement>("[data-estado]")!;
+  const pista = document.querySelector<HTMLElement>("[data-pista]")!;
+
+  // Cuánto tiene que avanzar la ficha para entrar en la toma.
+  const medir = () => {
+    const toma = enchufe.querySelector<SVGElement>(".toma")!;
+    const hueco = toma.getBoundingClientRect().left - ficha.getBoundingClientRect().right;
+    const escala = toma.getBoundingClientRect().width / 220;
+    ficha.style.setProperty("--hasta", `${hueco + 62 * escala}px`);
+  };
+
+  const pintar = () => {
+    const on = navigator.onLine;
+    estado.textContent = on ? "Conexión recuperada" : "Sin conexión";
+    estado.classList.toggle("badge-red", !on);
+    estado.classList.toggle("badge-green", on);
+    if (!on) enchufe.classList.remove("conectado");
+  };
+
+  const frases = [
+    "Rebotó. Internet sigue sin aparecer.",
+    "Nada. Capaz que el router está de mal humor.",
+    "Mientras tanto podés ir preparando un café.",
+  ];
+  let n = 0;
+
+  ficha.addEventListener("click", () => {
+    medir();
+    if (navigator.onLine) {
+      enchufe.classList.add("conectado");
+      pista.textContent = "¡Enchufado! Ya podés reintentar.";
+      return;
+    }
+    ficha.classList.remove("rebota");
+    void ficha.offsetWidth;
+    ficha.classList.add("rebota");
+    pista.textContent = frases[n++ % frases.length];
+  });
+
+  window.addEventListener("online", () => {
+    pintar();
+    medir();
+    enchufe.classList.add("conectado");
+    pista.textContent = "¡Volvió internet! Ya podés reintentar.";
+  });
+  window.addEventListener("offline", pintar);
+  pintar();
+
+  // Reintentar = volver a lo que se estaba viendo antes de caer acá.
+  document.querySelector<HTMLAnchorElement>("[data-reintentar]")!.addEventListener("click", (e) => {
+    if (history.length > 1) { e.preventDefault(); history.back(); }
+  });
+</script>
