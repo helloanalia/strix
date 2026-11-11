@@ -55,7 +55,7 @@ const centros: Centro[] = [
           centros.map((c, i) =>
             "panel" in c ? (
               <div class={`centro-item c${i + 1} panel`}>
-                <img src={ruta("/img/panel.webp")} width="2400" height="1275" alt="" loading="lazy" />
+                <img src={ruta("/img/panel-pedidos.webp")} width="1440" height="1148" alt="" loading="lazy" />
               </div>
             ) : "pago" in c ? (
               /* El 03 muestra el pedido que entra ya pago. Precio en pesos uruguayos. */
