@@ -7,13 +7,31 @@ const circulos = [514, 690, 908, 1164];
 
 // El centro cambia según el paso que se esté señalando: los platos del menú,
 // el panel donde entran los pedidos, el pedido pago y la tarjeta de sellos.
+// Las tres tarjetas del 01 copian el componente "Menú/Producto v4" de la app
+// (pantalla M01 del Figma Strix-APP: Promociones → Novedades → Combos).
+interface Producto {
+  foto: string;
+  nombre: string;
+  detalle: string;
+  precio: string;
+  antes?: string;
+  extra?: string;
+  etiqueta?: { texto: string; tono: "promo" | "nuevo" };
+}
 type Centro =
   | { sellos: number; pie: "escanear" | "completa" }
   | { pago: true }
-  | { premios: string[] }
+  | { menu: Producto[] }
   | { panel: true };
 const centros: Centro[] = [
-  { premios: ["🍔", "☕", "🍕"] },   // 01 — los platos que cargás en el menú
+  { menu: [                        // 01 — los productos que cargás en el menú
+    { foto: "/img/menu/combo.webp", nombre: "Combo desayuno", detalle: "Café + 2 medialunas",
+      antes: "$380", precio: "$340", extra: "hasta 25/10", etiqueta: { texto: "Promo", tono: "promo" } },
+    { foto: "/img/menu/coldbrew.webp", nombre: "Cold brew", detalle: "Café frío de 12 horas, con hielo.",
+      precio: "$190", etiqueta: { texto: "Nuevo", tono: "nuevo" } },
+    { foto: "/img/menu/merienda.webp", nombre: "Merienda", detalle: "Café + tostado",
+      precio: "$420", extra: "Ahorrás $40" },
+  ] },
   { panel: true },                  // 02 — los pedidos entran al panel
   { pago: true },                   // 03 — el pedido llega pago
   { sellos: 3, pie: "escanear" },   // 04 — la tarjeta de sellos para que vuelvan
@@ -65,10 +83,25 @@ const centros: Centro[] = [
                 <span class="pago-total">$ 650</span>
                 <span class="pago-ok">✓ Pagado en la app</span>
               </div>
-            ) : "premios" in c ? (
+            ) : "menu" in c ? (
               /* El 03 tampoco: muestra lo que el cliente se lleva. */
-              <div class={`centro-item c${i + 1} premios`}>
-                {c.premios.map((e) => <span class="premio">{e}</span>)}
+              <div class={`centro-item c${i + 1} menu`}>
+                {c.menu.map((m) => (
+                  <div class="producto">
+                    <img class="producto-foto" src={ruta(m.foto)} width="160" height="160" alt="" loading="lazy" />
+                    <div class="producto-texto">
+                      {m.etiqueta && <span class={`producto-tag tag-${m.etiqueta.tono}`}>{m.etiqueta.texto}</span>}
+                      <strong class="producto-nombre">{m.nombre}</strong>
+                      <span class="producto-detalle">{m.detalle}</span>
+                      <span class="producto-precio">
+                        {m.antes && <s class="antes">{m.antes}</s>}
+                        <b class={m.antes ? "rebajado" : ""}>{m.precio}</b>
+                        {m.extra && <span class={m.antes ? "vence" : "ahorro"}>{m.extra}</span>}
+                      </span>
+                    </div>
+                    <span class="producto-mas">+</span>
+                  </div>
+                ))}
               </div>
             ) : (
               <div class={`centro-item c${i + 1} tarjeta`}>
@@ -232,30 +265,46 @@ const centros: Centro[] = [
     font-weight: 600;
   }
 
-  /* --- 01: los platos del menú --- */
-  /* Tampoco hay tarjeta: los emojis solos, en triángulo y encimados, que es
-     lo que el cliente se lleva. */
-  .premios {
+  /* --- 01: tres productos del menú, como en la app (M01) --- */
+  .menu {
     display: grid;
-    grid-template-columns: repeat(2, auto);
-    justify-content: center;
-    align-content: center;
-    column-gap: 0;
+    gap: 10px;
     background: none;
     border-radius: 0;
     box-shadow: none;
     overflow: visible;
   }
-  .premio {
-    font-size: 116px;
-    line-height: 1;
-    filter: drop-shadow(0 16px 22px rgb(40 46 120 / .32));
+  .producto {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 36px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 14px 30px rgb(40 46 120 / .2);
   }
-  /* El primero corona el triángulo; el margen negativo mete a los de abajo
-     dentro del hueco que deja el glifo del emoji, que trae mucho aire. */
-  .premio:nth-child(1) { grid-column: 1 / -1; justify-self: center; margin-bottom: -26px; rotate: -6deg; }
-  .premio:nth-child(2) { margin-right: -14px; rotate: -13deg; }
-  .premio:nth-child(3) { margin-left: -14px; rotate: 11deg; }
+  .producto:nth-child(1) { margin-right: 22px; }
+  .producto:nth-child(2) { margin-left: 22px; }
+  .producto:nth-child(3) { margin-right: 10px; }
+  .producto-foto { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; }
+  .producto-texto { display: grid; gap: 1px; justify-items: start; min-width: 0; }
+  .producto-tag { padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; margin-bottom: 2px; }
+  .tag-promo { background: #fee4e2; color: #b42318; }
+  .tag-nuevo { background: #e0e7ff; color: #3538cd; }
+  .producto-nombre { font-size: 15px; font-weight: 700; color: var(--fg); }
+  .producto-detalle { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .producto-precio { display: flex; gap: 6px; align-items: baseline; font-size: 13px; margin-top: 2px; }
+  .producto-precio b { color: var(--fg); }
+  .producto-precio .antes { color: var(--muted); }
+  .producto-precio .rebajado { color: #b42318; }
+  .producto-precio .vence { color: var(--muted); font-size: 12px; }
+  .producto-precio .ahorro { color: #067647; font-weight: 600; font-size: 12px; }
+  .producto-mas {
+    display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--indigo); color: #fff; font-size: 22px; line-height: 1;
+  }
 
   .tarjeta-pie {
     display: flex;
