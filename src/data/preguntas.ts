@@ -1,6 +1,7 @@
 /**
- * Preguntas frecuentes.
- * Copy tomada de strix.fan/#faq (el sitio en producción), no inventada.
+ * Preguntas frecuentes, con el mensaje de marketplace (nov 2026).
+ * Ojo: no prometer funciones que strix no tenga confirmadas ni decir que no
+ * cobra comisión (sí la cobra).
  */
 export interface Pregunta {
   pregunta: string;
@@ -9,28 +10,33 @@ export interface Pregunta {
 
 export const preguntas: Pregunta[] = [
   {
-    pregunta: "¿Necesito integrar mi sistema de caja o POS?",
+    pregunta: "¿Quién hace el delivery?",
     respuesta:
-      "No. strix funciona de forma independiente — no requiere integración con tu POS actual.",
+      "Tu propio equipo. strix no pone repartidores: vos definís las zonas, el costo de envío y los horarios, y el cliente también puede elegir pasar a retirar.",
+  },
+  {
+    pregunta: "¿Cómo cobro los pedidos?",
+    respuesta:
+      "El cliente paga en la plataforma al hacer el pedido, así que te llega pago. Vos solo lo preparás y lo entregás.",
   },
   {
     pregunta: "¿Mis clientes tienen que descargar una app?",
     respuesta:
-      "Los clientes acceden desde el navegador de su celular — sin descarga, sin fricción. Pueden elegir agregar el acceso directo a su pantalla de inicio para mayor comodidad.",
+      "No. Entran desde el navegador del celular, ven tu menú y piden. Si quieren, pueden agregar el acceso directo a su pantalla de inicio.",
   },
   {
-    pregunta: "¿En qué se diferencia strix de otras opciones del mercado?",
+    pregunta: "¿Necesito integrar mi sistema de caja o POS?",
     respuesta:
-      "Cada sello se valida contra una compra real vía QR de factura — no se puede acumular sin haber comprado, a diferencia de los sistemas de sellos manuales.",
+      "No. strix funciona de forma independiente: los pedidos y los pagos los ves en el panel, sin tocar tu caja actual.",
   },
   {
-    pregunta: "¿Cuánto tiempo lleva configurar todo?",
+    pregunta: "¿Puedo seguir usando la tarjeta de sellos?",
     respuesta:
-      "Menos de cinco minutos: elegís cuántas visitas necesita la tarjeta, subís tu logo y ya podés empezar a sumar sellos.",
+      "Sí. Cada compra suma un sello y cada premio tiene un QR de uso único. Además podés lanzar campañas para los días flojos.",
   },
   {
     pregunta: "¿Qué pasa con los datos de mis clientes?",
     respuesta:
-      "Los datos son tuyos. strix los usa únicamente para que vos puedas identificar y premiar a tus mejores clientes.",
+      "Los datos son tuyos. strix los usa únicamente para que vos puedas venderles y premiar a tus mejores clientes.",
   },
 ];

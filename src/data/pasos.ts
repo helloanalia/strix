@@ -1,6 +1,6 @@
 /**
- * Los 4 pasos de "Configurás una vez / Funciona solo".
- * Copy provista por Analía (el Figma tenía los cuatro pasos en placeholder).
+ * Los 4 pasos de "Configurás una vez / Vendés todos los días".
+ * Copy del mensaje de marketplace (Figma Strix-WEB, copia de trabajo, nov 2026).
  *
  * `icono` referencia una de las formas definidas en ComoFunciona.astro.
  */
@@ -14,33 +14,26 @@ export interface Paso {
 export const pasos: Paso[] = [
   {
     numero: "01",
-    titulo: "Armás tu tarjeta",
+    titulo: "Cargás tu menú",
     icono: "paleta",
-    texto:
-      "Elegís cuántas visitas necesita tu cliente para ganarse el premio. Ponés tu logo y listo en menos de cinco minutos.",
+    texto: "Subís tus platos con foto y precio. Si algo se termina, lo pausás en un toque.",
   },
   {
     numero: "02",
-    titulo: "El cliente escanea",
+    titulo: "Recibís pedidos online",
     icono: "escaneo",
-    // OJO: este texto termina con la misma frase que el paso 01 ("Ponés tu
-    // logo y listo en menos de cinco minutos"), que acá no viene a cuento.
-    // Parece un resto de copiar y pegar; queda tal cual vino hasta confirmar.
-    texto:
-      "Cada vez que vuelve, escanea el QR de su ticket y el sello queda registrado. Ponés tu logo y listo en menos de cinco minutos.",
+    texto: "Take away o delivery con tu propio equipo de reparto.",
   },
   {
     numero: "03",
-    titulo: "Premiás cuando importa",
+    titulo: "Cobrás en la plataforma",
     icono: "regalo",
-    texto:
-      "Al completar la tarjeta recibe su recompensa. Pero también podés mandarle un regalo antes de que lo espere — ese tipo de gesto no se olvida.",
+    texto: "El cliente paga en la app al hacer el pedido. Menos efectivo, menos vueltas.",
   },
   {
     numero: "04",
-    titulo: "Ves quién es quién",
+    titulo: "Hacés que vuelvan",
     icono: "grafico",
-    texto:
-      "El dashboard te muestra quiénes vienen seguido, cuánto gastan y hace cuánto no aparecen. Con eso decidís a quién premiar y cuándo mover el juego.",
+    texto: "Sumás tarjeta de sellos y campañas para que el que pidió una vez, vuelva.",
   },
 ];

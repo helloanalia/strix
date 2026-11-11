@@ -5,59 +5,22 @@ import { pasos } from "../data/pasos";
 // Círculos concéntricos del Figma: 514 / 690 / 908 / 1164 px, borde #DEE9F3.
 const circulos = [514, 690, 908, 1164];
 
-// El centro cambia según el paso que se esté señalando: la tarjeta en el
-// estado que describe cada texto, el premio para el 03 y el panel para el 04.
+// El centro cambia según el paso que se esté señalando: los platos del menú,
+// el panel donde entran los pedidos, el pedido pago y la tarjeta de sellos.
 type Centro =
   | { sellos: number; pie: "escanear" | "completa" }
-  | { qr: true }
+  | { pago: true }
   | { premios: string[] }
   | { panel: true };
-
 const centros: Centro[] = [
-  { sellos: 0, pie: "escanear" },   // 01 — la tarjeta recién armada
-  { qr: true },                     // 02 — el QR de la factura, solo
-  { premios: ["🍔", "☕", "🍦"] },    // 03 — lo que se lleva
-  { panel: true },                  // 04 — el dashboard
+  { premios: ["🍔", "☕", "🍕"] },   // 01 — los platos que cargás en el menú
+  { panel: true },                  // 02 — los pedidos entran al panel
+  { pago: true },                   // 03 — el pedido llega pago
+  { sellos: 3, pie: "escanear" },   // 04 — la tarjeta de sellos para que vuelvan
 ];
 // (pasos.ts trae además un `icono` por paso: lo usa el layout de tarjetas,
 //  este diagrama no lo necesita.)
 
-/* ---------------------------------------------------------------------------
-   QR del paso 02.
-
-   OJO: es DECORATIVO. No codifica nada: es el dibujo de la factura dentro de
-   una ilustración, no un QR que se pueda escanear. Se genera acá y no se trae
-   como imagen para que quede nítido en cualquier tamaño y no sume un archivo.
-
-   Lo que lo hace leer como QR son los tres ojos de posicionamiento en las
-   esquinas; el resto es ruido con semilla fija, así que el dibujo es siempre
-   el mismo build tras build.
---------------------------------------------------------------------------- */
-const QR_N = 25;
-
-// (fx, fy) es la esquina del ojo, que mide 7x7 y lleva un anillo de separación
-// en blanco alrededor. Devuelve null cuando el módulo cae fuera de su zona.
-const ojo = (fx: number, fy: number, x: number, y: number) => {
-  const dx = x - fx, dy = y - fy;
-  if (dx < -1 || dy < -1 || dx > 7 || dy > 7) return null;
-  if (dx < 0 || dy < 0 || dx > 6 || dy > 6) return false;   // la separación
-  const borde = dx === 0 || dy === 0 || dx === 6 || dy === 6;
-  const centro = dx >= 2 && dx <= 4 && dy >= 2 && dy <= 4;
-  return borde || centro;
-};
-
-let semilla = 20260920;
-const azar = () => (semilla = (semilla * 1103515245 + 12345) % 2147483648) / 2147483648;
-
-let qrPath = "";
-for (let y = 0; y < QR_N; y++) {
-  for (let x = 0; x < QR_N; x++) {
-    const enOjo =
-      ojo(0, 0, x, y) ?? ojo(QR_N - 7, 0, x, y) ?? ojo(0, QR_N - 7, x, y);
-    const lleno = enOjo ?? azar() > 0.55;
-    if (lleno) qrPath += `M${x} ${y}h1v1h-1z`;
-  }
-}
 ---
 
 <section class="como" id="como-funciona">
@@ -71,11 +34,11 @@ for (let y = 0; y < QR_N; y++) {
     <header class="como-head" data-reveal="up-md">
       <h2 class="section-title">
         <span class="line">Configurás una vez</span>
-        <span class="line accent">Funciona solo</span>
+        <span class="line accent">Vendés todos los días</span>
       </h2>
       <p class="lead">
-        No hay hardware que instalar ni caja que integrar. El cliente paga, escanea el QR de su
-        factura y el sello queda registrado. Vos ves todo desde el panel.
+        Cargás tu menú, elegís si hacés take away, delivery o las dos, y tu local queda online. Los
+        pedidos y los pagos entran por la plataforma y vos los ves todos desde el panel.
       </p>
     </header>
 
@@ -94,12 +57,13 @@ for (let y = 0; y < QR_N; y++) {
               <div class={`centro-item c${i + 1} panel`}>
                 <img src={ruta("/img/panel.webp")} width="2400" height="1275" alt="" loading="lazy" />
               </div>
-            ) : "qr" in c ? (
-              /* El 02 no muestra la tarjeta: muestra el QR que se escanea. */
-              <div class={`centro-item c${i + 1} qr-solo`}>
-                <svg viewBox={`0 0 ${QR_N} ${QR_N}`} xmlns="http://www.w3.org/2000/svg">
-                  <path d={qrPath} fill="#111634" shape-rendering="crispEdges" />
-                </svg>
+            ) : "pago" in c ? (
+              /* El 03 muestra el pedido que entra ya pago. Precio en pesos uruguayos. */
+              <div class={`centro-item c${i + 1} pago`}>
+                <span class="pago-num">Pedido #41 · Take away</span>
+                <strong class="pago-item">Hamburguesa doble con papas</strong>
+                <span class="pago-total">$ 650</span>
+                <span class="pago-ok">✓ Pagado en la app</span>
               </div>
             ) : "premios" in c ? (
               /* El 03 tampoco: muestra lo que el cliente se lleva. */
@@ -111,20 +75,18 @@ for (let y = 0; y < QR_N; y++) {
                 <div class="tarjeta-sellos">
                   {[1, 2, 3, 4, 5].map((n) =>
                     n <= c.sellos ? (
-                      <span class="sello sello-hecho">
-                        <img src={ruta("/img/pelota.webp")} alt="" width="98" height="98" />
-                      </span>
+                      <span class="sello sello-hecho">✓</span>
                     ) : (
                       <span class="sello">{n}</span>
                     ),
                   )}
                 </div>
                 <div class="tarjeta-pie">
-                  <div class="tarjeta-premio"><span>PREMIO</span><strong>2 horas</strong></div>
+                  <div class="tarjeta-premio"><span>PREMIO</span><strong>1 café</strong></div>
                   {c.pie === "completa" ? (
                     <span class="tarjeta-completa">Tarjeta completada</span>
                   ) : (
-                    <span class="tarjeta-cta">Escanear factura</span>
+                    <span class="tarjeta-cta">3 de 5 sellos</span>
                   )}
                 </div>
               </div>
@@ -242,25 +204,35 @@ for (let y = 0; y < QR_N; y++) {
     font-size: 15px;
     font-weight: 500;
   }
-  .sello-hecho { border-style: solid; border-color: #93c5fd; padding: 5px; }
-  .sello-hecho img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+  .sello-hecho { border-style: solid; border-color: #93c5fd; background: #fff; color: var(--indigo); font-size: 30px; font-weight: 700; }
 
-  /* --- 02: el QR de la factura --- */
-  /* Sin tarjeta: el QR solo, como el papel que el cliente pone bajo la cámara.
-     `left/right/translate` se reescriben porque .centro-item viene estirado de
-     lado a lado y el QR es cuadrado. */
-  .qr-solo {
+  /* --- 03: el pedido que llega pago --- */
+  .pago {
     left: 50%;
     right: auto;
-    width: 232px;
+    width: 300px;
     translate: -50% -50%;
-    padding: 18px;
+    display: grid;
+    gap: 6px;
+    padding: 24px 26px;
     background: #fff;
     rotate: 4deg;
   }
-  .qr-solo svg { display: block; width: 100%; height: auto; }
+  .pago-num { font-size: 13px; color: var(--muted); }
+  .pago-item { font-size: 18px; line-height: 1.3; color: var(--fg); }
+  .pago-total { font-size: 34px; font-weight: 700; color: var(--fg); }
+  .pago-ok {
+    justify-self: start;
+    margin-top: 6px;
+    padding: 8px 14px;
+    border-radius: var(--r-xl);
+    background: #dcfce7;
+    color: #166534;
+    font-size: 14px;
+    font-weight: 600;
+  }
 
-  /* --- 03: el premio --- */
+  /* --- 01: los platos del menú --- */
   /* Tampoco hay tarjeta: los emojis solos, en triángulo y encimados, que es
      lo que el cliente se lleva. */
   .premios {

@@ -42,18 +42,18 @@ import { ruta } from "../lib/ruta";
   <div class="hero-escena">
     <div class="hero-col">
       <h1 class="display hero-title" data-reveal="up-lg" style="--rv-delay:.1s">
-        <span class="line">Convertí</span>
-        <span class="line">tus clientes</span>
-        <span class="line">en <em>fans</em></span>
+        <span class="line">Tu menú</span>
+        <span class="line">tu delivery</span>
+        <span class="line">tus <em>clientes</em></span>
       </h1>
     </div>
 
     <div class="hero-art" aria-hidden="true">
       <span class="phone phone-back" data-parallax="0.085">
-        <img src={ruta("/img/hero-phone-back.webp")} width="651" height="1231" alt="" loading="eager" />
+        <img src={ruta("/img/hero-phone-back.webp")} width="1300" height="2444" alt="" loading="eager" />
       </span>
       <span class="phone phone-front" data-parallax="0.055">
-        <img src={ruta("/img/hero-phone-front.webp")} width="750" height="1460" alt="" loading="eager" />
+        <img src={ruta("/img/hero-phone-front.webp")} width="1500" height="2904" alt="" loading="eager" />
       </span>
     </div>
   </div>
@@ -193,9 +193,8 @@ import { ruta } from "../lib/ruta";
   }
   .hero-title {
     color: var(--indigo);
-    /* Calibrado sobre la línea más larga: "tus clientes" mide 6.6 px de ancho
-       por cada px de cuerpo, así que 0.1486 del ancho del contenido la deja
-       ocupando ~98% de la columna. */
+    /* Calibrado sobre la línea más larga ("tu delivery"). Sin comas al final de línea: con este interlineado, la coma baja hasta la línea siguiente y parece un acento: 0.1486 del ancho
+       del contenido la deja ocupando casi toda la columna sin desbordar. */
     font-size: clamp(34px, calc(var(--escena) * 0.1486), 210px);
     line-height: 0.882;                                            /* 142/161 */
   }
@@ -209,7 +208,10 @@ import { ruta } from "../lib/ruta";
     position: relative;
     z-index: 3;
     height: calc(var(--escena) * 0.584);    /* alto del celular de adelante */
-    margin-top: calc(var(--escena) * -0.15);  /* se montan sobre el titular */
+    /* Con "Tu menú, tu delivery, tus clientes" la última línea es larga: si los
+       celulares se montan mucho sobre el titular, tapan "clientes". Solo pisan
+       el borde de abajo de la última línea. */
+    margin-top: calc(var(--escena) * -0.035);
     pointer-events: none;
   }
   /* El wrapper lleva la deriva con el scroll; la imagen, el flote y la
