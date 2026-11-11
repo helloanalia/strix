@@ -1,6 +1,8 @@
 # strix — landing
 
-Landing de una página para **strix**, el programa de fidelización de clientes.
+Landing de una página para **strix**, el marketplace para restaurantes: menú
+digital, venta online con delivery propio, pago en la plataforma, campañas y
+tarjeta de sellos. (Hasta nov 2026 era la landing del programa de fidelización.)
 Réplica del diseño de Figma `Strix web` (frame `Strix-one page`, 1440 × 8448).
 
 ## Stack
@@ -36,7 +38,7 @@ src/
   components/               · una sección de la landing por archivo
     Hero · ComoFunciona · Herramientas · Banner
     Rubros · Preguntas · Clientes · Contacto · Footer
-  data/pasos.ts             · los 4 pasos de "Configurás una vez"
+  data/pasos.ts             · los 4 pasos de "Configurás una vez / Vendés todos los días"
   data/preguntas.ts         · las preguntas frecuentes
   styles/global.css         · tokens del Figma (colores, tipografía, radios)
 public/
@@ -191,9 +193,6 @@ public/
 - [x] ~~Copy de los 4 pasos del diagrama radial~~ — provista por Analía el
       2026-09-20 y cargada en `src/data/pasos.ts`. El Figma seguía con los
       cuatro pasos en placeholder.
-- [ ] **El texto del paso 02 termina con "Ponés tu logo y listo en menos de
-      cinco minutos"**, que es el cierre del paso 01 y acá no viene a cuento.
-      Parece un resto de copiar y pegar; está tal cual vino, a confirmar.
 - [ ] **El formulario no envía a ningún lado.** Valida y avisa que es un
       prototipo. Para conectarlo gratis: Formspree o Web3Forms en el `action`.
 - [ ] **Falta el nombre de una de las marcas** de "Empresas que confían en
